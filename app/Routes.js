@@ -5,6 +5,7 @@
 import React from 'react';
 import ReactModal from 'react-modal';
 import { Switch, Route } from 'react-router';
+import native from '../native/index.node';
 import { ErrorModal, ErrorModalData } from './components/ErrorModal';
 import cstyles from './components/Common.css';
 import routes from './constants/routes.json';
@@ -61,6 +62,8 @@ export default class RouteApp extends React.Component<Props, AppState> {
 
     // Set the Modal's app element
     ReactModal.setAppElement('#root');
+
+    console.log(native.litelib_wallet_exists('main'));
   }
 
   componentDidMount() {

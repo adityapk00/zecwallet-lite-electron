@@ -1,0 +1,21 @@
+[package]
+name = "electron-tests"
+version = "0.1.0"
+edition = "2018"
+authors = ["The Neon Community"]
+license = "MIT/Apache-2.0"
+build = "build.rs"
+
+[lib]
+name = "electron_tests"
+crate-type = ["cdylib"]
+
+[build-dependencies]
+neon-build = "0.3.3"
+
+[dependencies]
+zecwalletlitelib = { git = "https://github.com/adityapk00/zecwallet-light-cli", rev = "3b4ea3f2cc1a44e6823bffbc81abf3682d236a55" }
+neon = "0.3.3"
+lazy_static = "1.4.0"
+neon-serde = "0.2.0"
+serde = "1.0.80"
