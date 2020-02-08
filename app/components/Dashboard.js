@@ -119,18 +119,21 @@ export default class Home extends Component<Props> {
                 <div>Address</div>
                 <div>Balance</div>
               </div>
-              {addressesWithBalance && (
-                <Accordion>
-                  {addressesWithBalance.map(ab => (
-                    <AddressBalanceItem
-                      key={ab.address}
-                      item={ab}
-                      currencyName={info.currencyName}
-                      zecPrice={info.zecPrice}
-                    />
-                  ))}
-                </Accordion>
-              )}
+              {addressesWithBalance &&
+                (addressesWithBalance.length === 0 ? (
+                  <div className={[cstyles.center, cstyles.sublight].join(' ')}>No Addresses with a balance</div>
+                ) : (
+                  <Accordion>
+                    {addressesWithBalance.map(ab => (
+                      <AddressBalanceItem
+                        key={ab.address}
+                        item={ab}
+                        currencyName={info.currencyName}
+                        zecPrice={info.zecPrice}
+                      />
+                    ))}
+                  </Accordion>
+                ))}
             </div>
           </ScrollPane>
         </div>
