@@ -13,6 +13,7 @@ import routes from '../constants/routes.json';
 import Logo from '../assets/img/logobig.gif';
 import { Info } from './AppState';
 import Utils from '../utils/utils';
+import RPC from '../rpc';
 
 const PayURIModal = ({
   modalIsOpen,
@@ -164,6 +165,25 @@ class Sidebar extends PureComponent<Props, State> {
     // Pay URI
     ipcRenderer.on('payuri', (event, uri) => {
       this.openURIModal(uri);
+    });
+
+    // Export Seed
+    ipcRenderer.on('seed', () => {
+      const seed = RPC.fetchSeed();
+
+      openErrorModal(
+        'Wallet Seed',
+        <div className={cstyles.verticalflex}>
+          <div>
+            This is your wallet&quot;s seed phrase. It can be used to recover your entire wallet.
+            <br />
+            PLEASE KEEP IT SAFE!
+          </div>
+          <hr />
+          <div>{seed}</div>
+          <hr />
+        </div>
+      );
     });
   };
 

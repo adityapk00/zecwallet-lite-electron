@@ -41,7 +41,7 @@ export default class MenuBuilder {
     const { mainWindow } = this;
 
     const subMenuAbout = {
-      label: 'Electron',
+      label: 'Zecwallet Lite',
       submenu: [
         {
           label: 'About Zecwallet Fullnode',
@@ -91,8 +91,15 @@ export default class MenuBuilder {
       ]
     };
     const subMenuViewDev = {
-      label: 'View',
+      label: 'Wallet',
       submenu: [
+        {
+          label: 'Wallet Seed',
+          click: () => {
+            mainWindow.webContents.send('seed');
+          }
+        },
+        { type: 'separator' },
         {
           label: 'Reload',
           accelerator: 'Command+R',
@@ -117,13 +124,12 @@ export default class MenuBuilder {
       ]
     };
     const subMenuViewProd = {
-      label: 'View',
+      label: 'Wallet',
       submenu: [
         {
-          label: 'Toggle Full Screen',
-          accelerator: 'Ctrl+Command+F',
+          label: 'Wallet Seed',
           click: () => {
-            this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+            mainWindow.webContents.send('seed');
           }
         }
       ]
@@ -194,10 +200,16 @@ export default class MenuBuilder {
         ]
       },
       {
-        label: '&View',
+        label: '&Wallet',
         submenu:
           process.env.NODE_ENV === 'development'
             ? [
+                {
+                  label: 'Wallet Seed',
+                  click: () => {
+                    mainWindow.webContents.send('seed');
+                  }
+                },
                 {
                   label: '&Reload',
                   accelerator: 'Ctrl+R',
@@ -222,10 +234,9 @@ export default class MenuBuilder {
               ]
             : [
                 {
-                  label: 'Toggle &Full Screen',
-                  accelerator: 'F11',
+                  label: 'Wallet Seed',
                   click: () => {
-                    this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+                    mainWindow.webContents.send('seed');
                   }
                 }
               ]

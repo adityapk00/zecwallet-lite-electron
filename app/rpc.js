@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { TotalBalance, AddressBalance, Transaction, RPCConfig, TxDetail, Info } from './components/AppState';
 import native from '../native/index.node';
-import Utils from './utils/utils';
 
 export default class RPC {
   rpcConfig: RPCConfig;
@@ -164,31 +163,26 @@ export default class RPC {
     this.fnSetAllAddresses(allAddresses);
   }
 
-  async createNewAddress(zaddress: boolean) {
-    if (zaddress) {
-      const newaddress = await RPC.doRPC('z_getnewaddress', ['sapling'], this.rpcConfig);
+  static createNewAddress(zaddress: boolean) {
+    const addrStr = native.litelib_execute('new', zaddress ? 'z' : 't');
+    const addrJSON = JSON.parse(addrStr);
 
-      return newaddress.result;
-      // eslint-disable-next-line no-else-return
-    } else {
-      const newaddress = await RPC.doRPC('getnewaddress', [''], this.rpcConfig);
-
-      return newaddress.result;
-    }
+    return addrJSON[0];
   }
 
   // Fetch a private key for either a t or a z address
   async fetchPrivateKey(address: string) {
-    let method = '';
-    if (Utils.isZaddr(address)) {
-      method = 'z_exportkey';
-    } else if (Utils.isTransparent(address)) {
-      method = 'dumpprivkey';
-    }
+    const privKeyStr = native.litelib_execute('export', address);
+    const privKeyJSON = JSON.parse(privKeyStr);
 
-    const response = await RPC.doRPC(method, [address], this.rpcConfig);
+    this.fnSetSinglePrivateKey(address, privKeyJSON[0].private_key);
+  }
 
-    this.fnSetSinglePrivateKey(address, response.result);
+  static fetchSeed(): string {
+    const seedStr = native.litelib_execute('seed', '');
+    const seedJSON = JSON.parse(seedStr);
+
+    return seedJSON.seed;
   }
 
   // Fetch all T and Z transactions

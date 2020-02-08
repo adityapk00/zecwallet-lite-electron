@@ -50,7 +50,7 @@ export default class LoadingScreen extends Component<Props, LoadingScreenState> 
       // Try to load the light client
       const { url } = this.state;
 
-      const result = native.litelib_initialize_existing(true, url);
+      const result = native.litelib_initialize_existing(false, url);
       console.log(`Intialization: ${result}`);
 
       this.setupNextGetInfo();

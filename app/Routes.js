@@ -249,11 +249,11 @@ export default class RouteApp extends React.Component<Props, AppState> {
 
   createNewAddress = async (zaddress: boolean) => {
     // Create a new address
-    const newaddress = await this.rpc.createNewAddress(zaddress);
+    const newaddress = RPC.createNewAddress(zaddress);
     console.log(`Created new Address ${newaddress}`);
 
-    // And then fetch the list of addresses again to refresh
-    this.rpc.fetchAllAddresses();
+    // And then fetch the list of addresses again to refresh (totalBalance gets all addresses)
+    this.rpc.fetchTotalBalance();
 
     const { receivePageState } = this.state;
     const newRerenderKey = receivePageState.rerenderKey + 1;
