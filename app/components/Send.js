@@ -7,7 +7,6 @@
 // @flow
 import React, { PureComponent } from 'react';
 import Modal from 'react-modal';
-import Select from 'react-select';
 import TextareaAutosize from 'react-textarea-autosize';
 import hex from 'hex-string';
 import styles from './Send.css';
@@ -465,41 +464,7 @@ export default class Send extends PureComponent<Props, SendState> {
 
   render() {
     const { modalIsOpen, errorModalIsOpen, errorModalTitle, errorModalBody, sendButtonEnabled } = this.state;
-    const { sendPageState, info, openErrorModal, closeErrorModal } = this.props;
-
-    const customStyles = {
-      option: (provided, state) => ({
-        ...provided,
-        color: state.isSelected ? '#c3921f;' : 'white',
-        background: '#212124;',
-        padding: 20
-      }),
-      menu: provided => ({
-        ...provided,
-        background: '#212124;'
-      }),
-      control: () => ({
-        // none of react-select's styles are passed to <Control />
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'flex',
-        background: '#212124;'
-      }),
-      singleValue: (provided, state) => {
-        const opacity = state.isDisabled ? 0.5 : 1;
-        const transition = 'opacity 300ms';
-
-        return { ...provided, opacity, transition, color: '#ffffff' };
-      }
-    };
-
-    const { addressesWithBalance, sendTransaction } = this.props;
-    const sendFromList = addressesWithBalance.map(ab => {
-      return {
-        value: ab.address,
-        label: this.getLabelForFromAddress(ab.address, addressesWithBalance, info.currencyName)
-      };
-    });
+    const { addressesWithBalance, sendTransaction, sendPageState, info, openErrorModal, closeErrorModal } = this.props;
 
     // Find the fromaddress
     let fromaddr = {};
@@ -517,20 +482,7 @@ export default class Send extends PureComponent<Props, SendState> {
         <div className={[cstyles.xlarge, cstyles.padall, cstyles.center].join(' ')}>Send</div>
 
         <div className={styles.sendcontainer}>
-          <div className={[cstyles.well, cstyles.verticalflex].join(' ')}>
-            <div className={[cstyles.sublight, cstyles.padbottomsmall].join(' ')}>Send From</div>
-            <Select
-              value={fromaddr}
-              options={sendFromList}
-              styles={customStyles}
-              // $FlowFixMe
-              onChange={this.changeFrom}
-            />
-          </div>
-
-          <Spacer />
-
-          <ScrollPane offsetHeight={300}>
+          <ScrollPane offsetHeight={0}>
             {sendPageState.toaddrs.map(toaddr => {
               return (
                 <ToAddrBox

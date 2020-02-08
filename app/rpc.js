@@ -1,23 +1,7 @@
 import axios from 'axios';
-import _ from 'underscore';
-import hex from 'hex-string';
 import { TotalBalance, AddressBalance, Transaction, RPCConfig, TxDetail, Info } from './components/AppState';
-import Utils, { NO_CONNECTION } from './utils/utils';
-import SentTxStore from './utils/SentTxStore';
-
-const parseMemo = (memoHex: string): string | null => {
-  if (!memoHex || memoHex.length < 2) return null;
-
-  // First, check if this is a memo (first byte is less than 'f6' (246))
-  if (parseInt(memoHex.substr(0, 2), 16) >= 246) return null;
-
-  // Else, parse as Hex string
-  const textDecoder = new TextDecoder();
-  const memo = textDecoder.decode(hex.decode(memoHex));
-  if (memo === '') return null;
-
-  return memo;
-};
+import native from '../native/index.node';
+import Utils from './utils/utils';
 
 export default class RPC {
   rpcConfig: RPCConfig;
@@ -87,36 +71,14 @@ export default class RPC {
     this.refreshTimerID = setTimeout(() => this.refresh(lastBlockHeight), 20000);
   }
 
-  static async doRPC(method: string, params: [], rpcConfig: RPCConfig) {
-    const { url, username, password } = rpcConfig;
+  static doSync() {
+    const syncstr = native.litelib_execute('sync', '');
+    console.log(`Sync status: ${syncstr}`);
+  }
 
-    const response = await new Promise((resolve, reject) => {
-      axios(url, {
-        data: {
-          jsonrpc: '2.0',
-          id: 'curltest',
-          method,
-          params
-        },
-        method: 'POST',
-        auth: {
-          username,
-          password
-        }
-      })
-        .then(r => resolve(r.data))
-        .catch(err => {
-          const e = { ...err };
-          if (e.response && e.response.data) {
-            reject(e.response.data.error.message);
-          } else {
-            // eslint-disable-next-line prefer-promise-reject-errors
-            reject(NO_CONNECTION);
-          }
-        });
-    });
-
-    return response;
+  static doSave() {
+    const savestr = native.litelib_execute('save', '');
+    console.log(`Sync status: ${savestr}`);
   }
 
   async refresh(lastBlockHeight: number) {
@@ -124,14 +86,10 @@ export default class RPC {
 
     if (!lastBlockHeight || lastBlockHeight < latestBlockHeight) {
       const balP = this.fetchTotalBalance();
-      const abP = this.fetchTandZAddressesWithBalances();
-      const txns = this.fetchTandZTransactions();
-      const addrs = this.fetchAllAddresses();
+      const txns = this.fetchTandZTransactions(latestBlockHeight);
 
       await balP;
-      await abP;
       await txns;
-      await addrs;
 
       // All done, set up next fetch
       console.log(`Finished full refresh at ${latestBlockHeight}`);
@@ -144,28 +102,24 @@ export default class RPC {
   }
 
   // Special method to get the Info object. This is used both internally and by the Loading screen
-  static async getInfoObject(rpcConfig: RPCConfig) {
-    const infoResult = await RPC.doRPC('getinfo', [], rpcConfig);
+  static getInfoObject() {
+    const infostr = native.litelib_execute('info', '');
+    const infoJSON = JSON.parse(infostr);
 
     const info = new Info();
-    info.testnet = infoResult.result.testnet;
-    info.latestBlock = infoResult.result.blocks;
-    info.connections = infoResult.result.connections;
-    info.version = infoResult.result.version;
+    info.testnet = infoJSON.chain_name === 'testnet';
+    info.latestBlock = infoJSON.latest_block_height;
+    info.connections = 1;
+    info.version = infoJSON.version;
+    info.verificationProgress = 1;
     info.currencyName = info.testnet ? 'TAZ' : 'ZEC';
-    info.zecPrice = null; // Setting this to null will copy over the existing price
-
-    const blkInfoResult = await RPC.doRPC('getblockchaininfo', [], rpcConfig);
-    info.verificationProgress = blkInfoResult.result.verificationprogress;
-
-    const solps = await RPC.doRPC('getnetworksolps', [], rpcConfig);
-    info.solps = solps.result;
+    info.solps = 0;
 
     return info;
   }
 
   async fetchInfo(): number {
-    const info = await RPC.getInfoObject(this.rpcConfig);
+    const info = RPC.getInfoObject(this.rpcConfig);
 
     this.fnSetInfo(info);
 
@@ -174,14 +128,40 @@ export default class RPC {
 
   // This method will get the total balances
   async fetchTotalBalance() {
-    const response = await RPC.doRPC('z_gettotalbalance', [0], this.rpcConfig);
+    const balanceStr = native.litelib_execute('balance', '');
+    const balanceJSON = JSON.parse(balanceStr);
 
+    // Total Balance
     const balance = new TotalBalance();
-    balance.total = response.result.total;
-    balance.private = response.result.private;
-    balance.transparent = response.result.transparent;
+    balance.private = balanceJSON.tbalance / 10 ** 8;
+    balance.transparent = balanceJSON.zbalance / 10 ** 8;
+    balance.total = balance.private + balance.transparent;
 
     this.fnSetTotalBalance(balance);
+
+    // Addresses with Balance. The lite client reports balances in zatoshi, so divide by 10^8;
+    const zaddresses = balanceJSON.z_addresses
+      .map(o => {
+        return new AddressBalance(o.address, o.zbalance / 10 ** 8);
+      })
+      .filter(ab => ab.balance > 0);
+
+    const taddresses = balanceJSON.t_addresses
+      .map(o => {
+        return new AddressBalance(o.address, o.balance / 10 ** 8);
+      })
+      .filter(ab => ab.balance > 0);
+
+    const addresses = zaddresses.concat(taddresses);
+
+    this.fnSetAddressesWithBalance(addresses);
+
+    // Also set all addresses
+    const allZAddresses = balanceJSON.z_addresses.map(o => o.address);
+    const allTAddresses = balanceJSON.t_addresses.map(o => o.address);
+    const allAddresses = allZAddresses.concat(allTAddresses);
+
+    this.fnSetAllAddresses(allAddresses);
   }
 
   async createNewAddress(zaddress: boolean) {
@@ -211,124 +191,42 @@ export default class RPC {
     this.fnSetSinglePrivateKey(address, response.result);
   }
 
-  // Fetch all addresses and their associated balances
-  async fetchTandZAddressesWithBalances() {
-    const zresponse = RPC.doRPC('z_listunspent', [], this.rpcConfig);
-    const tresponse = RPC.doRPC('listunspent', [], this.rpcConfig);
-
-    // Do the Z addresses
-    // response.result has all the unspent notes.
-    const unspentNotes = (await zresponse).result;
-    const zgroups = _.groupBy(unspentNotes, 'address');
-    const zaddresses = Object.keys(zgroups).map(address => {
-      const balance = zgroups[address].reduce((prev, obj) => prev + obj.amount, 0);
-      return new AddressBalance(address, Number(balance.toFixed(8)));
-    });
-
-    // Do the T addresses
-    const unspentTXOs = (await tresponse).result;
-    const tgroups = _.groupBy(unspentTXOs, 'address');
-    const taddresses = Object.keys(tgroups).map(address => {
-      const balance = tgroups[address].reduce((prev, obj) => prev + obj.amount, 0);
-      return new AddressBalance(address, Number(balance.toFixed(8)));
-    });
-
-    const addresses = zaddresses.concat(taddresses);
-
-    this.fnSetAddressesWithBalance(addresses);
-  }
-
   // Fetch all T and Z transactions
-  async fetchTandZTransactions() {
-    const tresponse = await RPC.doRPC('listtransactions', [], this.rpcConfig);
-    const zaddressesPromise = RPC.doRPC('z_listaddresses', [], this.rpcConfig);
-    const senttxstorePromise = SentTxStore.loadSentTxns();
+  async fetchTandZTransactions(latestBlockHeight: number) {
+    const listStr = native.litelib_execute('list', '');
+    const listJSON = JSON.parse(listStr);
 
-    const ttxlist = tresponse.result.map(tx => {
+    const txlist = listJSON.map(tx => {
       const transaction = new Transaction();
-      transaction.address = tx.address;
-      transaction.type = tx.category;
-      transaction.amount = tx.amount;
-      transaction.confirmations = tx.confirmations;
+
+      const type = tx.outgoing_metadata ? 'Sent' : 'Receive';
+
+      transaction.address = type === 'Sent' ? tx.outgoing_metadata[0].address : tx.address;
+      transaction.type = type;
+      transaction.amount = tx.amount / 10 ** 8;
+      transaction.confirmations = latestBlockHeight - tx.block_height;
       transaction.txid = tx.txid;
-      transaction.time = tx.time;
-      transaction.detailedTxns = [new TxDetail()];
-      transaction.detailedTxns[0].address = tx.address;
-      transaction.detailedTxns[0].amount = tx.amount;
+      transaction.time = tx.datetime;
+      if (tx.outgoing_metadata) {
+        transaction.detailedTxns = tx.outgoing_metadata.map(o => {
+          const detail = new TxDetail();
+          detail.address = o.address;
+          detail.amount = o.value / 10 ** 8;
+          detail.memo = o.memo;
+
+          return detail;
+        });
+      } else {
+        transaction.detailedTxns = [new TxDetail()];
+        transaction.detailedTxns[0].address = tx.address;
+        transaction.detailedTxns[0].amount = tx.amount / 10 ** 8;
+        transaction.detailedTxns[0].memo = tx.memo;
+      }
 
       return transaction;
     });
 
-    // Now get Z txns
-    const zaddresses = await zaddressesPromise;
-
-    const alltxnsPromise = zaddresses.result.map(async zaddr => {
-      // For each zaddr, get the list of incoming transactions
-      const incomingTxns = await RPC.doRPC('z_listreceivedbyaddress', [zaddr], this.rpcConfig);
-      const txns = incomingTxns.result
-        .filter(itx => !itx.change)
-        .map(incomingTx => {
-          return {
-            address: zaddr,
-            txid: incomingTx.txid,
-            memo: parseMemo(incomingTx.memo),
-            amount: incomingTx.amount
-          };
-        });
-
-      return txns;
-    });
-
-    const alltxns = (await Promise.all(alltxnsPromise)).flat();
-
-    // Now, for each tx in the array, call gettransaction
-    const ztxlist = await Promise.all(
-      alltxns.map(async tx => {
-        const txresponse = await RPC.doRPC('gettransaction', [tx.txid], this.rpcConfig);
-
-        const transaction = new Transaction();
-        transaction.address = tx.address;
-        transaction.type = 'receive';
-        transaction.amount = tx.amount;
-        transaction.confirmations = txresponse.result.confirmations;
-        transaction.txid = tx.txid;
-        transaction.time = txresponse.result.time;
-        transaction.detailedTxns = [new TxDetail()];
-        transaction.detailedTxns[0].address = tx.address;
-        transaction.detailedTxns[0].amount = tx.amount;
-        transaction.detailedTxns[0].memo = tx.memo;
-
-        return transaction;
-      })
-    );
-
-    // Get transactions from the sent tx store
-    const sentTxns = await senttxstorePromise;
-
-    // Now concat the t and z transactions, and call the update function again
-    const alltxlist = ttxlist
-      .concat(ztxlist)
-      .concat(sentTxns)
-      .sort((tx1, tx2) => {
-        if (tx1.time && tx2.time) {
-          return tx2.time - tx1.time;
-        }
-
-        return tx1.confirmations - tx2.confirmations;
-      });
-
-    this.fnSetTransactionsList(alltxlist);
-  }
-
-  // Get all Addresses, including T and Z addresses
-  async fetchAllAddresses() {
-    const zaddrsPromise = RPC.doRPC('z_listaddresses', [], this.rpcConfig);
-    const taddrsPromise = RPC.doRPC('getaddressesbyaccount', [''], this.rpcConfig);
-
-    const allZ = (await zaddrsPromise).result;
-    const allT = (await taddrsPromise).result;
-
-    this.fnSetAllAddresses(allZ.concat(allT));
+    this.fnSetTransactionsList(txlist);
   }
 
   // Send a transaction using the already constructed sendJson structure

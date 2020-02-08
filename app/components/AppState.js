@@ -110,13 +110,7 @@ export class ReceivePageState {
 export class RPCConfig {
   url: string;
 
-  username: string;
-
-  password: string;
-
   constructor() {
-    this.username = '';
-    this.password = '';
     this.url = '';
   }
 }
