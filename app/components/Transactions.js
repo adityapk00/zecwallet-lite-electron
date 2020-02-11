@@ -211,7 +211,6 @@ export default class Transactions extends Component<Props, State> {
   txClicked = (tx: Transaction) => {
     // Show the modal
     if (!tx) return;
-    console.log(tx);
     this.setState({ clickedTx: tx, modalIsOpen: true });
   };
 

@@ -399,7 +399,7 @@ export default class Send extends PureComponent<Props, SendState> {
     const toAddr = newToAddrs.find(a => a.id === id);
     if (address) {
       // $FlowFixMe
-      toAddr.to = address.target.value;
+      toAddr.to = address.target.value.replace(/ /g, ''); // Remove spaces
     }
 
     if (amount) {

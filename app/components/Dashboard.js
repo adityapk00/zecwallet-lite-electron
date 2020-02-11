@@ -113,7 +113,7 @@ export default class Home extends Component<Props> {
         </div>
 
         <div className={styles.addressbalancecontainer}>
-          <ScrollPane offsetHeight={300}>
+          <ScrollPane offsetHeight={200}>
             <div className={styles.addressbooklist}>
               <div className={[cstyles.flexspacebetween, cstyles.tableheader, cstyles.sublight].join(' ')}>
                 <div>Address</div>
