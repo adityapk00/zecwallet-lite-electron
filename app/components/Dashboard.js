@@ -124,14 +124,16 @@ export default class Home extends Component<Props> {
                   <div className={[cstyles.center, cstyles.sublight].join(' ')}>No Addresses with a balance</div>
                 ) : (
                   <Accordion>
-                    {addressesWithBalance.map(ab => (
-                      <AddressBalanceItem
-                        key={ab.address}
-                        item={ab}
-                        currencyName={info.currencyName}
-                        zecPrice={info.zecPrice}
-                      />
-                    ))}
+                    {addressesWithBalance
+                      .filter(ab => ab.balance > 0)
+                      .map(ab => (
+                        <AddressBalanceItem
+                          key={ab.address}
+                          item={ab}
+                          currencyName={info.currencyName}
+                          zecPrice={info.zecPrice}
+                        />
+                      ))}
                   </Accordion>
                 ))}
             </div>
