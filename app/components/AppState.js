@@ -137,6 +137,23 @@ export class Info {
   locked: boolean;
 }
 
+export class PasswordState {
+  showPassword: boolean;
+
+  confirmNeeded: boolean;
+
+  passwordCallback: (password: string) => void;
+
+  closeCallback: () => void;
+
+  constructor() {
+    this.showPassword = false;
+    this.confirmNeeded = false;
+    this.passwordCallback = null;
+    this.closeCallback = null;
+  }
+}
+
 // eslint-disable-next-line max-classes-per-file
 export default class AppState {
   // The total confirmed and unconfirmed balance in this wallet
@@ -171,4 +188,7 @@ export default class AppState {
 
   // getinfo and getblockchaininfo result
   info: Info;
+
+  // Callbacks for the password dialog box
+  passwordState: PasswordState;
 }

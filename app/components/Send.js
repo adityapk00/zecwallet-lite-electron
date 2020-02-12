@@ -199,10 +199,12 @@ const ConfirmModal = ({
   sendPageState,
   info,
   sendTransaction,
+  unlockWallet,
   clearToAddrs,
   closeModal,
   modalIsOpen,
-  openErrorModal
+  openErrorModal,
+  openPassword
 }) => {
   const sendingTotal = sendPageState.toaddrs.reduce((s, t) => parseFloat(s) + parseFloat(t.amount), 0.0) + 0.0001;
   const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(sendingTotal);
@@ -210,26 +212,54 @@ const ConfirmModal = ({
   const sendButton = () => {
     // First, close the confirm modal.
     closeModal();
-    // This will be replaced by either a success TXID or error message that the user
-    // has to close manually.
-    openErrorModal('Computing Transaction', 'Please wait...This could take a while');
 
-    // Then send the Tx async
-    (async () => {
-      const sendJson = getSendManyJSON(sendPageState);
-      let success = false;
+    const doSubmitTx = () => {
+      // This will be replaced by either a success TXID or error message that the user
+      // has to close manually.
+      openErrorModal('Computing Transaction', 'Please wait...This could take a while');
 
-      try {
-        success = await sendTransaction(sendJson, openErrorModal);
-      } catch (err) {
-        // If there was an error, show the error modal
-        openErrorModal('Error Sending Transaction', err);
-      }
+      // Then send the Tx async
+      (async () => {
+        const sendJson = getSendManyJSON(sendPageState);
+        let success = false;
 
-      if (success) {
-        clearToAddrs();
-      }
-    })();
+        try {
+          success = await sendTransaction(sendJson, openErrorModal);
+        } catch (err) {
+          // If there was an error, show the error modal
+          openErrorModal('Error Sending Transaction', err);
+        }
+
+        if (success) {
+          clearToAddrs();
+        }
+      })();
+    };
+
+    // If the wallet is encrypted and locked, we need to unlock it firs
+    if (info.encrypted && info.locked) {
+      openPassword(
+        false,
+        // If the user enters a password, we unlock the wallet first
+        (password: string) => {
+          (async () => {
+            const success = await unlockWallet(password);
+
+            if (success) {
+              // If the unlock succeeded, do the submit
+              doSubmitTx();
+            } else {
+              openErrorModal('Wallet unlock failed', 'Could not unlock the wallet with the password.');
+            }
+          })();
+        },
+        // Close callback is a no-op
+        () => {}
+      );
+    } else {
+      // Directly submit the tx
+      doSubmitTx();
+    }
   };
 
   return (
@@ -288,20 +318,15 @@ const ConfirmModal = ({
 
 type Props = {
   addressesWithBalance: AddressBalance[],
-
   addressBook: AddressBookEntry[],
-
   sendPageState: SendPageState,
-
   sendTransaction: (sendJson: [], (string, string) => void) => void,
-
   setSendPageState: (sendPageState: SendPageState) => void,
-
   openErrorModal: (title: string, body: string) => void,
-
   closeErrorModal: () => void,
-
-  info: Info
+  info: Info,
+  openPassword: (confirmNeeded: boolean, passwordCallback: (string) => void, closeCallback: () => void) => void,
+  unlockWallet: (password: string) => boolean
 };
 
 class SendState {
@@ -461,7 +486,16 @@ export default class Send extends PureComponent<Props, SendState> {
 
   render() {
     const { modalIsOpen, errorModalIsOpen, errorModalTitle, errorModalBody, sendButtonEnabled } = this.state;
-    const { addressesWithBalance, sendTransaction, sendPageState, info, openErrorModal, closeErrorModal } = this.props;
+    const {
+      addressesWithBalance,
+      sendTransaction,
+      sendPageState,
+      info,
+      openErrorModal,
+      closeErrorModal,
+      openPassword,
+      unlockWallet
+    } = this.props;
 
     // Find the fromaddress
     let fromaddr = {};
@@ -524,6 +558,8 @@ export default class Send extends PureComponent<Props, SendState> {
             closeModal={this.closeModal}
             modalIsOpen={modalIsOpen}
             clearToAddrs={this.clearToAddrs}
+            openPassword={openPassword}
+            unlockWallet={unlockWallet}
           />
 
           <ErrorModal

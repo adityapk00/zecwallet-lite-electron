@@ -99,7 +99,7 @@ export default class RPC {
     const infoJSON = JSON.parse(infostr);
 
     const info = new Info();
-    info.testnet = infoJSON.chain_name === 'testnet';
+    info.testnet = infoJSON.chain_name === 'test';
     info.latestBlock = infoJSON.latest_block_height;
     info.connections = 1;
     info.version = infoJSON.version;
@@ -254,6 +254,13 @@ export default class RPC {
     }
 
     return true;
+  }
+
+  static async unlockWallet(password: string): boolean {
+    const resultStr = native.litelib_execute('unlock', password);
+    const resultJSON = JSON.parse(resultStr);
+
+    return resultJSON.result === 'success';
   }
 
   setupNextZecPriceRefresh(retryCount: number, timeout: number) {

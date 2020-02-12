@@ -23,7 +23,8 @@ import AppState, {
   RPCConfig,
   Info,
   ReceivePageState,
-  AddressBookEntry
+  AddressBookEntry,
+  PasswordState
 } from './components/AppState';
 import RPC from './rpc';
 import Utils from './utils/utils';
@@ -32,6 +33,7 @@ import AddressBook from './components/Addressbook';
 import AddressbookImpl from './utils/AddressbookImpl';
 import Sidebar from './components/Sidebar';
 import Transactions from './components/Transactions';
+import PasswordModal from './components/PasswordModal';
 
 type Props = {};
 
@@ -53,7 +55,8 @@ export default class RouteApp extends React.Component<Props, AppState> {
       rpcConfig: new RPCConfig(),
       info: new Info(),
       location: null,
-      errorModalData: new ErrorModalData()
+      errorModalData: new ErrorModalData(),
+      passwordState: new PasswordState()
     };
 
     // Create the initial ToAddr box
@@ -104,6 +107,31 @@ export default class RouteApp extends React.Component<Props, AppState> {
     errorModalData.modalIsOpen = false;
 
     this.setState({ errorModalData });
+  };
+
+  openPassword = (confirmNeeded: boolean, passwordCallback: string => void, closeCallback: () => void) => {
+    const passwordState = new PasswordState();
+
+    passwordState.showPassword = true;
+    passwordState.confirmNeeded = confirmNeeded;
+
+    // Set the callbacks, but before calling them back, we close the modals
+    passwordState.passwordCallback = (password: string) => {
+      this.setState({ passwordState: new PasswordState() });
+      passwordCallback(password);
+    };
+    passwordState.closeCallback = () => {
+      this.setState({ passwordState: new PasswordState() });
+      closeCallback();
+    };
+
+    this.setState({ passwordState });
+  };
+
+  unlockWallet = async (password: string): boolean => {
+    const success = await RPC.unlockWallet(password);
+
+    return success;
   };
 
   setInfo = (info: Info) => {
@@ -276,14 +304,17 @@ export default class RouteApp extends React.Component<Props, AppState> {
       sendPageState,
       receivePageState,
       info,
-      errorModalData
+      errorModalData,
+      passwordState
     } = this.state;
 
     const standardProps = {
       openErrorModal: this.openErrorModal,
       closeErrorModal: this.closeErrorModal,
       setSendTo: this.setSendTo,
-      info
+      info,
+      openPassword: this.openPassword,
+      unlockWallet: this.unlockWallet
     };
 
     return (
@@ -293,6 +324,12 @@ export default class RouteApp extends React.Component<Props, AppState> {
           body={errorModalData.body}
           modalIsOpen={errorModalData.modalIsOpen}
           closeModal={this.closeErrorModal}
+        />
+
+        <PasswordModal
+          modalIsOpen={passwordState.showPassword}
+          passwordCallback={passwordState.passwordCallback}
+          closeCallback={passwordState.closeCallback}
         />
 
         <div style={{ overflow: 'hidden' }}>
