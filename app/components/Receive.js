@@ -16,7 +16,7 @@ import Utils from '../utils/utils';
 import { AddressBalance, Info, ReceivePageState, AddressBookEntry } from './AppState';
 import ScrollPane from './ScrollPane';
 
-const AddressBlock = ({ addressBalance, label, currencyName, zecPrice, privateKey, getSinglePrivateKey }) => {
+const AddressBlock = ({ addressBalance, label, currencyName, zecPrice, privateKey, fetchAndSetSinglePrivKey }) => {
   const { address } = addressBalance;
 
   const [copied, setCopied] = useState(false);
@@ -80,7 +80,7 @@ const AddressBlock = ({ addressBalance, label, currencyName, zecPrice, privateKe
                 <button
                   className={[cstyles.primarybutton].join(' ')}
                   type="button"
-                  onClick={() => getSinglePrivateKey(address)}
+                  onClick={() => fetchAndSetSinglePrivKey(address)}
                 >
                   Export Private Key
                 </button>
@@ -102,7 +102,7 @@ type Props = {
   addressBook: AddressBookEntry[],
   info: Info,
   receivePageState: ReceivePageState,
-  getSinglePrivateKey: string => void,
+  fetchAndSetSinglePrivKey: string => void,
   createNewAddress: boolean => void,
   rerenderKey: number
 };
@@ -116,7 +116,7 @@ export default class Receive extends Component<Props> {
       addressBook,
       info,
       receivePageState,
-      getSinglePrivateKey,
+      fetchAndSetSinglePrivKey,
       createNewAddress,
       rerenderKey
     } = this.props;
@@ -187,7 +187,7 @@ export default class Receive extends Component<Props> {
                       label={addressBookMap[a.address]}
                       zecPrice={info.zecPrice}
                       privateKey={addressPrivateKeys[a.address]}
-                      getSinglePrivateKey={getSinglePrivateKey}
+                      fetchAndSetSinglePrivKey={fetchAndSetSinglePrivKey}
                       rerender={this.rerender}
                     />
                   ))}
@@ -214,7 +214,7 @@ export default class Receive extends Component<Props> {
                       currencyName={info.currencyName}
                       zecPrice={info.zecPrice}
                       privateKey={addressPrivateKeys[a.address]}
-                      getSinglePrivateKey={getSinglePrivateKey}
+                      fetchAndSetSinglePrivKey={fetchAndSetSinglePrivKey}
                       rerender={this.rerender}
                     />
                   ))}

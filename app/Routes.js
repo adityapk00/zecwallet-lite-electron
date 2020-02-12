@@ -76,7 +76,6 @@ export default class RouteApp extends React.Component<Props, AppState> {
         this.setAddressesWithBalances,
         this.setTransactionList,
         this.setAllAddresses,
-        this.setSinglePrivateKey,
         this.setInfo,
         this.setZecPrice
       );
@@ -237,21 +236,23 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ info: newInfo });
   };
 
-  setSinglePrivateKey = (address: string, key: string) => {
-    const addressPrivateKeys = {};
-    addressPrivateKeys[address] = key;
-    this.setState({ addressPrivateKeys });
-    console.log(`Added private key for ${address}`);
-  };
-
   sendTransaction = async (sendJson: [], fnOpenSendErrorModal: (string, string) => void) => {
     const success = await this.rpc.sendTransaction(sendJson, fnOpenSendErrorModal);
     return success;
   };
 
+  // Get a single private key for this address, and return it as a string.
+  getPrivKeyAsString = (address: string): string => {
+    return RPC.getPrivKeyAsString(address);
+  };
+
   // Getter methods, which are called by the components to update the state
-  getSinglePrivateKey = (address: string) => {
-    this.rpc.fetchPrivateKey(address);
+  fetchAndSetSinglePrivKey = async (address: string) => {
+    const key = await RPC.getPrivKeyAsString(address);
+    const addressPrivateKeys = {};
+    addressPrivateKeys[address] = key;
+
+    this.setState({ addressPrivateKeys });
   };
 
   addAddressBookEntry = (label: string, address: string) => {
@@ -335,7 +336,13 @@ export default class RouteApp extends React.Component<Props, AppState> {
         <div style={{ overflow: 'hidden' }}>
           {info && info.version && (
             <div className={cstyles.sidebarcontainer}>
-              <Sidebar info={info} setSendTo={this.setSendTo} {...standardProps} />
+              <Sidebar
+                info={info}
+                setSendTo={this.setSendTo}
+                getPrivKeyAsString={this.getPrivKeyAsString}
+                addresses={addresses}
+                {...standardProps}
+              />
             </div>
           )}
           <div className={cstyles.contentcontainer}>
@@ -364,7 +371,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
                     receivePageState={receivePageState}
                     addressBook={addressBook}
                     {...standardProps}
-                    getSinglePrivateKey={this.getSinglePrivateKey}
+                    fetchAndSetSinglePrivKey={this.fetchAndSetSinglePrivKey}
                     createNewAddress={this.createNewAddress}
                   />
                 )}

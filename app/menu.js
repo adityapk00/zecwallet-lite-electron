@@ -99,6 +99,12 @@ export default class MenuBuilder {
             mainWindow.webContents.send('seed');
           }
         },
+        {
+          label: '&Export All Private Keys',
+          click: () => {
+            mainWindow.webContents.send('exportall');
+          }
+        },
         { type: 'separator' },
         {
           label: 'Reload',
@@ -211,6 +217,12 @@ export default class MenuBuilder {
                   }
                 },
                 {
+                  label: '&Export All Private Keys',
+                  click: () => {
+                    mainWindow.webContents.send('exportall');
+                  }
+                },
+                {
                   label: '&Reload',
                   accelerator: 'Ctrl+R',
                   click: () => {
@@ -237,6 +249,12 @@ export default class MenuBuilder {
                   label: 'Wallet Seed',
                   click: () => {
                     mainWindow.webContents.send('seed');
+                  }
+                },
+                {
+                  label: '&Export All Private Keys',
+                  click: () => {
+                    mainWindow.webContents.send('exportall');
                   }
                 }
               ]

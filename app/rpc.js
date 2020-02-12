@@ -15,8 +15,6 @@ export default class RPC {
 
   fnSetAllAddresses: (string[]) => void;
 
-  fnSetSinglePrivateKey: (string, string) => void;
-
   // This function is not set via a constructor, but via the sendTransaction method
   fnOpenSendErrorModal: (string, string) => void;
 
@@ -31,7 +29,6 @@ export default class RPC {
     fnSetAddressesWithBalance: (AddressBalance[]) => void,
     fnSetTransactionsList: (Transaction[]) => void,
     fnSetAllAddresses: (string[]) => void,
-    fnSetSinglePrivateKey: (string, string) => void,
     fnSetInfo: Info => void,
     fnSetZecPrice: number => void
   ) {
@@ -39,7 +36,6 @@ export default class RPC {
     this.fnSetAddressesWithBalance = fnSetAddressesWithBalance;
     this.fnSetTransactionsList = fnSetTransactionsList;
     this.fnSetAllAddresses = fnSetAllAddresses;
-    this.fnSetSinglePrivateKey = fnSetSinglePrivateKey;
     this.fnSetInfo = fnSetInfo;
     this.fnSetZecPrice = fnSetZecPrice;
   }
@@ -161,19 +157,18 @@ export default class RPC {
     this.fnSetAllAddresses(allAddresses);
   }
 
+  static getPrivKeyAsString(address: string): string {
+    const privKeyStr = native.litelib_execute('export', address);
+    const privKeyJSON = JSON.parse(privKeyStr);
+
+    return privKeyJSON[0].private_key;
+  }
+
   static createNewAddress(zaddress: boolean) {
     const addrStr = native.litelib_execute('new', zaddress ? 'z' : 't');
     const addrJSON = JSON.parse(addrStr);
 
     return addrJSON[0];
-  }
-
-  // Fetch a private key for either a t or a z address
-  async fetchPrivateKey(address: string) {
-    const privKeyStr = native.litelib_execute('export', address);
-    const privKeyJSON = JSON.parse(privKeyStr);
-
-    this.fnSetSinglePrivateKey(address, privKeyJSON[0].private_key);
   }
 
   static fetchSeed(): string {
