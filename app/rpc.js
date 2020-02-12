@@ -193,7 +193,9 @@ export default class RPC {
 
       const type = tx.outgoing_metadata ? 'sent' : 'receive';
 
-      transaction.address = type === 'sent' ? tx.outgoing_metadata[0].address : tx.address;
+      transaction.address =
+        // eslint-disable-next-line no-nested-ternary
+        type === 'sent' ? (tx.outgoing_metadata.length > 0 ? tx.outgoing_metadata[0].address : '') : tx.address;
       transaction.type = type;
       transaction.amount = tx.amount / 10 ** 8;
       transaction.confirmations = latestBlockHeight - tx.block_height;
