@@ -22,11 +22,7 @@ export default class RPC {
 
   fnSetZecPrice: number => void;
 
-  opids: Set<string>;
-
   refreshTimerID: TimerID;
-
-  opTimerID: TimerID;
 
   priceTimerID: TimerID;
 
@@ -46,8 +42,6 @@ export default class RPC {
     this.fnSetSinglePrivateKey = fnSetSinglePrivateKey;
     this.fnSetInfo = fnSetInfo;
     this.fnSetZecPrice = fnSetZecPrice;
-
-    this.opids = new Set();
   }
 
   async configure(rpcConfig: RPCConfig) {
@@ -55,10 +49,6 @@ export default class RPC {
 
     if (!this.refreshTimerID) {
       this.refreshTimerID = setTimeout(() => this.refresh(), 1000);
-    }
-
-    if (!this.opTimerID) {
-      this.opTimerID = setTimeout(() => this.refreshOpStatus(), 1000);
     }
 
     if (!this.priceTimerID) {
@@ -84,6 +74,9 @@ export default class RPC {
     const latestBlockHeight = await this.fetchInfo();
 
     if (!lastBlockHeight || lastBlockHeight < latestBlockHeight) {
+      // If the latest block height has changed, make sure to sync
+      await RPC.doSync();
+
       const balP = this.fetchTotalBalance();
       const txns = this.fetchTandZTransactions(latestBlockHeight);
 
@@ -193,9 +186,9 @@ export default class RPC {
     const txlist = listJSON.map(tx => {
       const transaction = new Transaction();
 
-      const type = tx.outgoing_metadata ? 'Sent' : 'Receive';
+      const type = tx.outgoing_metadata ? 'sent' : 'receive';
 
-      transaction.address = type === 'Sent' ? tx.outgoing_metadata[0].address : tx.address;
+      transaction.address = type === 'sent' ? tx.outgoing_metadata[0].address : tx.address;
       transaction.type = type;
       transaction.amount = tx.amount / 10 ** 8;
       transaction.confirmations = latestBlockHeight - tx.block_height;
@@ -227,63 +220,35 @@ export default class RPC {
   async sendTransaction(sendJson: [], fnOpenSendErrorModal: (string, string) => void): boolean {
     this.fnOpenSendErrorModal = fnOpenSendErrorModal;
 
+    let sendStr;
     try {
-      const opid = (await RPC.doRPC('z_sendmany', sendJson, this.rpcConfig)).result;
-
-      this.addOpidToMonitor(opid);
-
-      return true;
+      sendStr = native.litelib_execute('send', JSON.stringify(sendJson));
     } catch (err) {
       // TODO Show a modal with the error
       console.log(`Error sending Tx: ${err}`);
       throw err;
     }
-  }
 
-  // Start monitoring the given opid
-  async addOpidToMonitor(opid: string) {
-    this.opids.add(opid);
-    this.refreshOpStatus();
-  }
+    if (sendStr.startsWith('Error')) {
+      // Throw the proper error
+      throw sendStr.split(/[\r\n]+/)[0];
+    }
 
-  setupNextOpidSatusFetch() {
-    if (this.opids.size > 0) {
-      this.opTimerID = setTimeout(() => this.refreshOpStatus(), 2000); // 2 sec
+    console.log(`Send response: ${sendStr}`);
+    const sendJSON = JSON.parse(sendStr);
+    const { txid, error } = sendJSON;
+
+    if (error) {
+      console.log(`Error sending Tx: ${error}`);
+      throw error;
     } else {
-      this.opTimerID = null;
-    }
-  }
-
-  async refreshOpStatus() {
-    if (this.opids.size > 0) {
-      // Get all the operation statuses.
-      [...this.opids].map(async id => {
-        try {
-          const resultJson = await RPC.doRPC('z_getoperationstatus', [[id]], this.rpcConfig);
-
-          const result = resultJson.result[0];
-
-          if (result.status === 'success') {
-            this.opids.delete(id);
-            const { txid } = result.result;
-
-            this.fnOpenSendErrorModal(
-              'Successfully Broadcast Transaction',
-              `Transaction was successfully broadcast. TXID: ${txid}`
-            );
-          } else if (result.status === 'failed') {
-            this.opids.delete(id);
-
-            this.fnOpenSendErrorModal('Error Sending Transaction', `Opid ${id} Failed. ${result.error.message}`);
-          }
-        } catch (err) {
-          // If we can't get a response for this OPID, then just forget it and move on
-          this.opids.delete(id);
-        }
-      });
+      this.fnOpenSendErrorModal(
+        'Successfully Broadcast Transaction',
+        `Transaction was successfully broadcast. TXID: ${txid}`
+      );
     }
 
-    this.setupNextOpidSatusFetch();
+    return true;
   }
 
   setupNextZecPriceRefresh(retryCount: number, timeout: number) {

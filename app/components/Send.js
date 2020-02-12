@@ -151,22 +151,19 @@ const ToAddrBox = ({
 };
 
 function getSendManyJSON(sendPageState: SendPageState): [] {
-  const json = [];
-  json.push(sendPageState.fromaddr);
-  json.push(
-    sendPageState.toaddrs.map(to => {
-      const textEncoder = new TextEncoder();
-      const memo = to.memo ? hex.encode(textEncoder.encode(to.memo)) : '';
-      if (memo === '') {
-        return { address: to.to, amount: to.amount };
-      } else {
-        return { address: to.to, amount: to.amount, memo };
-      }
-    })
-  );
+  const json = sendPageState.toaddrs.map(to => {
+    const textEncoder = new TextEncoder();
+    const memo = to.memo ? hex.encode(textEncoder.encode(to.memo)) : '';
+    if (memo === '') {
+      return { address: to.to, amount: parseFloat(to.amount) * 10 ** 8 };
+    } else {
+      return { address: to.to, amount: parseFloat(to.amount) * 10 ** 8, memo };
+    }
+  });
 
   console.log('Sending:');
   console.log(json);
+
   return json;
 }
 
@@ -482,7 +479,7 @@ export default class Send extends PureComponent<Props, SendState> {
         <div className={[cstyles.xlarge, cstyles.padall, cstyles.center].join(' ')}>Send</div>
 
         <div className={styles.sendcontainer}>
-          <ScrollPane offsetHeight={0}>
+          <ScrollPane offsetHeight={150}>
             {sendPageState.toaddrs.map(toaddr => {
               return (
                 <ToAddrBox
