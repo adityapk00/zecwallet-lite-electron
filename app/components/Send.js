@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable no-else-return */
 /* eslint-disable radix */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
@@ -54,6 +55,11 @@ const ToAddrBox = ({
     if (s && s.length > 1 && s[1].length > 8) {
       amountError = 'Too Many Decimals';
     }
+  }
+
+  if (isNaN(toaddr.amount)) {
+    // Amount is empty
+    amountError = 'Amount cannot be empty';
   }
 
   if (
@@ -403,8 +409,14 @@ export default class Send extends PureComponent<Props, SendState> {
     }
 
     if (amount) {
+      // Check to see the new amount if valid
       // $FlowFixMe
-      toAddr.amount = amount.target.value;
+      const newAmount = parseFloat(amount.target.value);
+      if (newAmount < 0 || newAmount > 21 * 10 ** 6) {
+        return;
+      }
+      // $FlowFixMe
+      toAddr.amount = newAmount;
     }
 
     if (memo) {
