@@ -131,6 +131,10 @@ export class Info {
   solps: number;
 
   zecPrice: number;
+
+  encrypted: boolean;
+
+  locked: boolean;
 }
 
 // eslint-disable-next-line max-classes-per-file

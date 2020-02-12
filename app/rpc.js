@@ -107,6 +107,11 @@ export default class RPC {
     info.currencyName = info.testnet ? 'TAZ' : 'ZEC';
     info.solps = 0;
 
+    const encStatus = native.litelib_execute('encryptionstatus', '');
+    const encJSON = JSON.parse(encStatus);
+    info.encrypted = encJSON.encrypted;
+    info.locked = encJSON.locked;
+
     return info;
   }
 
