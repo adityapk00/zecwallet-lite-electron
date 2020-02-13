@@ -1,8 +1,8 @@
 {
   "name": "zecwallet",
-  "productName": "Zecwallet FullNode",
-  "version": "0.9.0-beta1",
-  "description": "Zecwallet FullNode",
+  "productName": "Zecwallet Lite",
+  "version": "1.1.0-beta1",
+  "description": "Zecwallet Lite",
   "main": "./main.prod.js",
   "author": {
     "name": "Aditya Kulkarni",
