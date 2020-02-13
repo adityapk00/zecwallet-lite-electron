@@ -127,8 +127,53 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ passwordState });
   };
 
+  // This will:
+  //  1. Check if the wallet is encrypted and locked
+  //  2. If it is, open the password dialog
+  //  3. Attempt to unlock wallet.
+  //    a. If unlock suceeds, do the callback
+  //    b. If the unlock fails, show an error
+  //  4. If wallet is not encrypted or already unlocked, just call the successcallback.
+  openPasswordAndUnlockIfNeeded = (successCallback: () => void) => {
+    // Check if it is locked
+    const { info } = this.state;
+
+    if (info.encrypted && info.locked) {
+      this.openPassword(
+        false,
+        (password: string) => {
+          (async () => {
+            const success = await this.unlockWallet(password);
+
+            if (success) {
+              // If the unlock succeeded, do the submit
+              successCallback();
+            } else {
+              this.openErrorModal('Wallet unlock failed', 'Could not unlock the wallet with the password.');
+            }
+          })();
+        },
+        // Close callback is a no-op
+        () => {}
+      );
+    } else {
+      successCallback();
+    }
+  };
+
   unlockWallet = async (password: string): boolean => {
     const success = await RPC.unlockWallet(password);
+
+    if (success) {
+      // Update the wallet state
+      const { info } = this.state;
+
+      const newInfo = new Info();
+      Object.assign(newInfo, info);
+      newInfo.locked = false;
+
+      this.setState({ info: newInfo });
+    }
 
     return success;
   };
@@ -242,17 +287,21 @@ export default class RouteApp extends React.Component<Props, AppState> {
   };
 
   // Get a single private key for this address, and return it as a string.
+  // Wallet needs to be unlocked
   getPrivKeyAsString = (address: string): string => {
-    return RPC.getPrivKeyAsString(address);
+    const pk = RPC.getPrivKeyAsString(address);
+    return pk;
   };
 
   // Getter methods, which are called by the components to update the state
   fetchAndSetSinglePrivKey = async (address: string) => {
-    const key = await RPC.getPrivKeyAsString(address);
-    const addressPrivateKeys = {};
-    addressPrivateKeys[address] = key;
+    this.openPasswordAndUnlockIfNeeded(async () => {
+      const key = await RPC.getPrivKeyAsString(address);
+      const addressPrivateKeys = {};
+      addressPrivateKeys[address] = key;
 
-    this.setState({ addressPrivateKeys });
+      this.setState({ addressPrivateKeys });
+    });
   };
 
   addAddressBookEntry = (label: string, address: string) => {
@@ -314,8 +363,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
       closeErrorModal: this.closeErrorModal,
       setSendTo: this.setSendTo,
       info,
-      openPassword: this.openPassword,
-      unlockWallet: this.unlockWallet
+      openPasswordAndUnlockIfNeeded: this.openPasswordAndUnlockIfNeeded
     };
 
     return (

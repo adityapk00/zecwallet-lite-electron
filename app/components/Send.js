@@ -205,12 +205,11 @@ const ConfirmModal = ({
   sendPageState,
   info,
   sendTransaction,
-  unlockWallet,
   clearToAddrs,
   closeModal,
   modalIsOpen,
   openErrorModal,
-  openPassword
+  openPasswordAndUnlockIfNeeded
 }) => {
   const sendingTotal = sendPageState.toaddrs.reduce((s, t) => parseFloat(s) + parseFloat(t.amount), 0.0) + 0.0001;
   const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(sendingTotal);
@@ -219,7 +218,7 @@ const ConfirmModal = ({
     // First, close the confirm modal.
     closeModal();
 
-    const doSubmitTx = () => {
+    openPasswordAndUnlockIfNeeded(() => {
       // This will be replaced by either a success TXID or error message that the user
       // has to close manually.
       openErrorModal('Computing Transaction', 'Please wait...This could take a while');
@@ -240,32 +239,7 @@ const ConfirmModal = ({
           clearToAddrs();
         }
       })();
-    };
-
-    // If the wallet is encrypted and locked, we need to unlock it firs
-    if (info.encrypted && info.locked) {
-      openPassword(
-        false,
-        // If the user enters a password, we unlock the wallet first
-        (password: string) => {
-          (async () => {
-            const success = await unlockWallet(password);
-
-            if (success) {
-              // If the unlock succeeded, do the submit
-              doSubmitTx();
-            } else {
-              openErrorModal('Wallet unlock failed', 'Could not unlock the wallet with the password.');
-            }
-          })();
-        },
-        // Close callback is a no-op
-        () => {}
-      );
-    } else {
-      // Directly submit the tx
-      doSubmitTx();
-    }
+    });
   };
 
   return (
@@ -331,8 +305,7 @@ type Props = {
   openErrorModal: (title: string, body: string) => void,
   closeErrorModal: () => void,
   info: Info,
-  openPassword: (confirmNeeded: boolean, passwordCallback: (string) => void, closeCallback: () => void) => void,
-  unlockWallet: (password: string) => boolean
+  openPasswordAndUnlockIfNeeded: (successCallback: () => void) => void
 };
 
 class SendState {
@@ -505,8 +478,7 @@ export default class Send extends PureComponent<Props, SendState> {
       info,
       openErrorModal,
       closeErrorModal,
-      openPassword,
-      unlockWallet
+      openPasswordAndUnlockIfNeeded
     } = this.props;
 
     // Find the fromaddress
@@ -570,8 +542,7 @@ export default class Send extends PureComponent<Props, SendState> {
             closeModal={this.closeModal}
             modalIsOpen={modalIsOpen}
             clearToAddrs={this.clearToAddrs}
-            openPassword={openPassword}
-            unlockWallet={unlockWallet}
+            openPasswordAndUnlockIfNeeded={openPasswordAndUnlockIfNeeded}
           />
 
           <ErrorModal
