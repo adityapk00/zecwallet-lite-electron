@@ -10,7 +10,7 @@
  *
  * @flow
  */
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -42,6 +42,9 @@ const installExtensions = async () => {
   return Promise.all(extensions.map(name => installer.default(installer[name], forceDownload))).catch(console.log);
 };
 
+let waitingForClose = false;
+let proceedToClose = false;
+
 const createWindow = async () => {
   if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
     await installExtensions();
@@ -72,6 +75,45 @@ const createWindow = async () => {
       mainWindow.show();
       mainWindow.focus();
     }
+  });
+
+  mainWindow.on('close', event => {
+    // If we are clear to close, then return and allow everything to close
+    if (proceedToClose) {
+      console.log('proceed to close, so closing');
+      return;
+    }
+
+    // If we're already waiting for close, then don't allow another close event to actually close the window
+    if (waitingForClose) {
+      console.log('waiting for close, so not closing');
+      event.preventDefault();
+      return;
+    }
+
+    console.log('setting waiting for close to true');
+    waitingForClose = true;
+    event.preventDefault();
+
+    ipcMain.on('appquitdone', () => {
+      console.log('received appquitdone, so doign quit');
+      waitingForClose = false;
+      proceedToClose = true;
+      app.quit();
+    });
+
+    // $FlowFixMe
+    mainWindow.webContents.send('appquitting');
+    console.log('send app quit to renderer');
+
+    // Failsafe, timeout after 10 seconds
+    setTimeout(() => {
+      waitingForClose = false;
+      proceedToClose = true;
+      console.log('timeout, quitting');
+
+      app.quit();
+    }, 10 * 1000);
   });
 
   mainWindow.on('closed', () => {
