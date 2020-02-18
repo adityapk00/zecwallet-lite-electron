@@ -132,7 +132,8 @@ type Props = {
   setSendTo: (address: string, amount: number | null, memo: string | null) => void,
   getPrivKeyAsString: (address: string) => string,
   history: PropTypes.object.isRequired,
-  openErrorModal: (title: string, body: string) => void
+  openErrorModal: (title: string, body: string) => void,
+  openPasswordAndUnlockIfNeeded: (successCallback: () => void) => void
 };
 
 type State = {
@@ -157,18 +158,18 @@ class Sidebar extends PureComponent<Props, State> {
 
   // Handle menu items
   setupMenuHandlers = async () => {
-    const { info, setSendTo, history, openErrorModal } = this.props;
+    const { info, setSendTo, history, openErrorModal, openPasswordAndUnlockIfNeeded } = this.props;
     const { testnet } = info;
 
     // About
     ipcRenderer.on('about', () => {
       openErrorModal(
-        'Zecwallet Fullnode',
+        'Zecwallet Lite',
         <div className={cstyles.verticalflex}>
-          <div className={cstyles.margintoplarge}>Zecwallet Fullnode v1.0-beta1</div>
+          <div className={cstyles.margintoplarge}>Zecwallet Lite v1.1.0-beta1</div>
           <div className={cstyles.margintoplarge}>Built with Electron. Copyright (c) 2018-2020, Aditya Kulkarni.</div>
           <div className={cstyles.margintoplarge}>
-            The MIT License (MIT) Copyright (c) 2018-present Zecwallet
+            The MIT License (MIT) Copyright (c) 2018-2020 Zecwallet
             <br />
             <br />
             Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -210,34 +211,38 @@ class Sidebar extends PureComponent<Props, State> {
 
     // Export Seed
     ipcRenderer.on('seed', () => {
-      const seed = RPC.fetchSeed();
+      openPasswordAndUnlockIfNeeded(() => {
+        const seed = RPC.fetchSeed();
 
-      openErrorModal(
-        'Wallet Seed',
-        <div className={cstyles.verticalflex}>
-          <div>
-            This is your wallet&quot;s seed phrase. It can be used to recover your entire wallet.
-            <br />
-            PLEASE KEEP IT SAFE!
+        openErrorModal(
+          'Wallet Seed',
+          <div className={cstyles.verticalflex}>
+            <div>
+              This is your wallet&quot;s seed phrase. It can be used to recover your entire wallet.
+              <br />
+              PLEASE KEEP IT SAFE!
+            </div>
+            <hr />
+            <div>{seed}</div>
+            <hr />
           </div>
-          <hr />
-          <div>{seed}</div>
-          <hr />
-        </div>
-      );
+        );
+      });
     });
 
     // Export all private keys
     ipcRenderer.on('exportall', async () => {
       // Get all the addresses and run export key on each of them.
       const { addresses, getPrivKeyAsString } = this.props;
-      const privKeysPromise = addresses.map(async a => {
-        const privKey = await getPrivKeyAsString(a);
-        return `${privKey} #${a}`;
-      });
-      const exportedPrivKeys = await Promise.all(privKeysPromise);
+      openPasswordAndUnlockIfNeeded(async () => {
+        const privKeysPromise = addresses.map(async a => {
+          const privKey = await getPrivKeyAsString(a);
+          return `${privKey} #${a}`;
+        });
+        const exportedPrivKeys = await Promise.all(privKeysPromise);
 
-      this.setState({ exportPrivKeysModalIsOpen: true, exportedPrivKeys });
+        this.setState({ exportPrivKeysModalIsOpen: true, exportedPrivKeys });
+      });
     });
   };
 

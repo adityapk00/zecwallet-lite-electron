@@ -44,7 +44,7 @@ export default class MenuBuilder {
       label: 'Zecwallet Lite',
       submenu: [
         {
-          label: 'About Zecwallet Fullnode',
+          label: 'About Zecwallet Lite',
           selector: 'orderFrontStandardAboutPanel:',
           click: () => {
             mainWindow.webContents.send('about');
@@ -54,7 +54,7 @@ export default class MenuBuilder {
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {
-          label: 'Hide Zecwallet Fullnode',
+          label: 'Hide Zecwallet Lite',
           accelerator: 'Command+H',
           selector: 'hide:'
         },
@@ -263,7 +263,7 @@ export default class MenuBuilder {
         label: 'Help',
         submenu: [
           {
-            label: 'About Zecwallet Fullnode',
+            label: 'About Zecwallet Lite',
             click: () => {
               mainWindow.webContents.send('about');
             }
