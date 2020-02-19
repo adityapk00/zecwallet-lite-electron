@@ -15,12 +15,13 @@ const DetailLine = ({ label, value }) => {
 };
 
 type Props = {
-  info: Info
+  info: Info,
+  refresh: PropTypes.object.isRequired
 };
 
 export default class Zcashd extends Component<Props> {
   render() {
-    const { info } = this.props;
+    const { info, refresh } = this.props;
 
     if (!info || !info.version) {
       return (
@@ -56,6 +57,12 @@ export default class Zcashd extends Component<Props> {
                 <DetailLine label="Connections" value={info.connections} />
                 <DetailLine label="Network Solution Rate" value={`${info.solps} Sol/s`} />
               </div>
+            </div>
+
+            <div className={cstyles.buttoncontainer}>
+              <button className={cstyles.primarybutton} type="button" onClick={refresh}>
+                Refresh All Data
+              </button>
             </div>
           </div>
         </div>
