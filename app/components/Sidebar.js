@@ -244,6 +244,11 @@ class Sidebar extends PureComponent<Props, State> {
         this.setState({ exportPrivKeysModalIsOpen: true, exportedPrivKeys });
       });
     });
+
+    // View zcashd
+    ipcRenderer.on('zcashd', () => {
+      history.push(routes.ZCASHD);
+    });
   };
 
   closeExportPrivKeysModal = () => {
@@ -375,20 +380,6 @@ class Sidebar extends PureComponent<Props, State> {
             routeName={routes.ADDRESSBOOK}
             currentRoute={location.pathname}
             iconname="fa-address-book"
-          />
-          {/*
-          <SidebarMenuItem
-            name="Settings"
-            routeName={routes.SETTINGS}
-            currentRoute={location.pathname}
-            iconname="fa-cogs"
-          />
-          */}
-          <SidebarMenuItem
-            name="zcashd"
-            routeName={routes.ZCASHD}
-            currentRoute={location.pathname}
-            iconname="fa-server"
           />
         </div>
 

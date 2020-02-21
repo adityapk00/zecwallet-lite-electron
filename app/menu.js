@@ -137,6 +137,12 @@ export default class MenuBuilder {
           click: () => {
             mainWindow.webContents.send('seed');
           }
+        },
+        {
+          label: 'Server info',
+          click: () => {
+            this.mainWindow.webContents.send('zcashd');
+          }
         }
       ]
     };
@@ -230,17 +236,16 @@ export default class MenuBuilder {
                   }
                 },
                 {
-                  label: 'Toggle &Full Screen',
-                  accelerator: 'F11',
-                  click: () => {
-                    this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
-                  }
-                },
-                {
                   label: 'Toggle &Developer Tools',
                   accelerator: 'Alt+Ctrl+I',
                   click: () => {
                     this.mainWindow.toggleDevTools();
+                  }
+                },
+                {
+                  label: 'Server info',
+                  click: () => {
+                    this.mainWindow.webContents.send('zcashd');
                   }
                 }
               ]
@@ -255,6 +260,12 @@ export default class MenuBuilder {
                   label: '&Export All Private Keys',
                   click: () => {
                     mainWindow.webContents.send('exportall');
+                  }
+                },
+                {
+                  label: 'Server info',
+                  click: () => {
+                    this.mainWindow.webContents.send('zcashd');
                   }
                 }
               ]

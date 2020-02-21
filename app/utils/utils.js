@@ -6,12 +6,12 @@ export const NO_CONNECTION: string = 'Could not connect to zcashd';
 export default class Utils {
   static isSapling(addr: string): boolean {
     if (!addr) return false;
-    return addr.startsWith('zs') || addr.startsWith('ztestsapling');
+    return new RegExp('^z[a-z0-9]{77}$').test(addr) || new RegExp('^ztestsapling[a-z0-9]{76}$').test(addr);
   }
 
   static isSprout(addr: string): boolean {
     if (!addr) return false;
-    return addr.startsWith('zc');
+    return new RegExp('^z[a-zA-Z0-9]{94}$').test(addr);
   }
 
   static isZaddr(addr: string): boolean {
@@ -21,7 +21,7 @@ export default class Utils {
 
   static isTransparent(addr: string): boolean {
     if (!addr) return false;
-    return addr.startsWith('t');
+    return new RegExp('^t[a-zA-Z0-9]{34}$').test(addr);
   }
 
   // Convert to max 8 decimal places, and remove trailing zeros

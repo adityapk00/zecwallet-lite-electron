@@ -343,6 +343,10 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ receivePageState: newReceivePageState });
   };
 
+  doRefresh = () => {
+    this.rpc.refresh();
+  };
+
   render() {
     const {
       totalBalance,
@@ -446,7 +450,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
                 path={routes.TRANSACTIONS}
                 render={() => <Transactions transactions={transactions} info={info} addressBook={addressBook} />}
               />
-              <Route path={routes.ZCASHD} render={() => <Zcashd info={info} />} />
+              <Route path={routes.ZCASHD} render={() => <Zcashd info={info} refresh={this.doRefresh} />} />
               <Route
                 path={routes.LOADING}
                 render={() => <LoadingScreen setRPCConfig={this.setRPCConfig} setInfo={this.setInfo} />}

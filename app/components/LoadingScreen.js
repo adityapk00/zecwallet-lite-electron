@@ -1,14 +1,13 @@
 /* eslint-disable max-classes-per-file */
 import React, { Component } from 'react';
-import { Redirect } from 'react-router';
-import { remote } from 'electron';
+import { Redirect, withRouter } from 'react-router';
+import { ipcRenderer } from 'electron';
 import native from '../../native/index.node';
 import routes from '../constants/routes.json';
 import { RPCConfig, Info } from './AppState';
 import RPC from '../rpc';
 import cstyles from './Common.css';
 import styles from './LoadingScreen.css';
-import { NO_CONNECTION } from '../utils/utils';
 import Logo from '../assets/img/logobig.gif';
 
 type Props = {
@@ -30,13 +29,13 @@ class LoadingScreenState {
   constructor() {
     this.currentStatus = 'Loading...';
     this.loadingDone = false;
-    this.zcashdSpawned = 0;
-    this.getinfoRetryCount = 0;
     this.rpcConfig = null;
+    this.url = '';
+    this.getinfoRetryCount = 0;
   }
 }
 
-export default class LoadingScreen extends Component<Props, LoadingScreenState> {
+class LoadingScreen extends Component<Props, LoadingScreenState> {
   constructor(props: Props) {
     super(props);
 
@@ -53,16 +52,27 @@ export default class LoadingScreen extends Component<Props, LoadingScreenState> 
       const result = native.litelib_initialize_existing(false, url);
       console.log(`Intialization: ${result}`);
 
+      this.setupExitHandler();
       this.setupNextGetInfo();
     })();
   }
+
+  setupExitHandler = () => {
+    // App is quitting, make sure to save the wallet properly.
+    ipcRenderer.on('appquitting', () => {
+      RPC.doSave();
+
+      // And reply that we're all done.
+      ipcRenderer.send('appquitdone');
+    });
+  };
 
   setupNextGetInfo() {
     setTimeout(() => this.getInfo(), 1000);
   }
 
   async getInfo() {
-    const { url, zcashdSpawned, getinfoRetryCount } = this.state;
+    const { url } = this.state;
 
     // Try getting the info.
     try {
@@ -86,36 +96,9 @@ export default class LoadingScreen extends Component<Props, LoadingScreenState> 
         // This will cause a redirect to the dashboard
         this.setState({ loadingDone: true });
       })();
-
-      // Set up to save wallet before exit.
-      remote.getCurrentWindow().on('close', () => {
-        RPC.doSave();
-      });
     } catch (err) {
       // Not yet finished loading. So update the state, and setup the next refresh
       this.setState({ currentStatus: err });
-
-      if (err === NO_CONNECTION && !zcashdSpawned) {
-        // Try to start zcashd
-        this.startZcashd();
-        this.setupNextGetInfo();
-      }
-
-      if (err === NO_CONNECTION && zcashdSpawned && getinfoRetryCount < 10) {
-        this.setState({ currentStatus: 'Waiting for zcashd to start...' });
-        const inc = getinfoRetryCount + 1;
-        this.setState({ getinfoRetryCount: inc });
-        this.setupNextGetInfo();
-      }
-
-      if (err === NO_CONNECTION && zcashdSpawned && getinfoRetryCount >= 10) {
-        // Give up
-        this.setState({ currentStatus: 'Failed to start zcashd. Giving up!' });
-      }
-
-      if (err !== NO_CONNECTION) {
-        this.setupNextGetInfo();
-      }
     }
   }
 
@@ -137,3 +120,5 @@ export default class LoadingScreen extends Component<Props, LoadingScreenState> 
     return <Redirect to={routes.DASHBOARD} />;
   }
 }
+
+export default withRouter(LoadingScreen);
