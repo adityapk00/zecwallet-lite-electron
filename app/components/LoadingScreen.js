@@ -49,10 +49,25 @@ class LoadingScreen extends Component<Props, LoadingScreenState> {
       // Try to load the light client
       const { url } = this.state;
 
-      const result = native.litelib_initialize_existing(false, url);
-      console.log(`Intialization: ${result}`);
-
+      // First, set up the exit handler
       this.setupExitHandler();
+
+      const result = native.litelib_initialize_existing(true, url);
+      console.log(`Intialization: ${result}`);
+      if (result !== 'OK') {
+        this.setState({
+          currentStatus: (
+            <span>
+              Error Initializing Lightclient
+              <br />
+              {result}
+            </span>
+          )
+        });
+
+        return;
+      }
+
       this.setupNextGetInfo();
     })();
   }
