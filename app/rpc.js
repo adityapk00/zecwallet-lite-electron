@@ -58,7 +58,18 @@ export default class RPC {
 
   static doSync() {
     const syncstr = native.litelib_execute('sync', '');
-    console.log(`Sync status: ${syncstr}`);
+    console.log(`Sync exec result: ${syncstr}`);
+  }
+
+  static doRescan() {
+    const syncstr = native.litelib_execute('rescan', '');
+    console.log(`rescan exec result: ${syncstr}`);
+  }
+
+  static doSyncStatus(): string {
+    const syncstr = native.litelib_execute('syncstatus', '');
+    console.log(`syncstatus: ${syncstr}`);
+    return syncstr;
   }
 
   static doSave() {

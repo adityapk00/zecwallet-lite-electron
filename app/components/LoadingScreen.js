@@ -94,23 +94,47 @@ class LoadingScreen extends Component<Props, LoadingScreenState> {
       const { setRPCConfig, setInfo } = this.props;
 
       const info = RPC.getInfoObject();
-      console.log(info);
-      setInfo(info);
-
-      const rpcConfig = new RPCConfig();
-      rpcConfig.url = url;
-      setRPCConfig(rpcConfig);
 
       // Do a sync at start
       this.setState({ currentStatus: 'Syncing...' });
-      (async () => {
-        RPC.doSync();
 
-        RPC.doSave();
+      // This will do the sync in another thread, so we have to check for sync status
+      RPC.Sync();
 
-        // This will cause a redirect to the dashboard
-        this.setState({ loadingDone: true });
-      })();
+      const me = this;
+
+      // And after a while, check the sync status.
+      const poller = setInterval(() => {
+        const syncstatus = RPC.doSyncStatus();
+        const ss = JSON.parse(syncstatus);
+
+        if (ss.syncing === 'false') {
+          // First, save the wallet so we don't lose the just-synced data
+          RPC.doSave();
+
+          // Set the info object, so the sidebar will show
+          console.log(info);
+          setInfo(info);
+
+          // This will cause a redirect to the dashboard
+          me.setState({ loadingDone: true });
+
+          // Configure the RPC, which will setup the refresh
+          const rpcConfig = new RPCConfig();
+          rpcConfig.url = url;
+          setRPCConfig(rpcConfig);
+
+          // And cancel the updater
+          clearInterval(poller);
+        } else {
+          // Still syncing, grab the status and update the status
+          const p = ss.synced_blocks;
+          const t = ss.total_blocks;
+          const currentStatus = `Syncing ${p} / ${t}`;
+
+          me.setState({ currentStatus });
+        }
+      }, 1000);
     } catch (err) {
       // Not yet finished loading. So update the state, and setup the next refresh
       this.setState({ currentStatus: err });

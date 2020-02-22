@@ -6,6 +6,7 @@ use neon_serde::export;
 
 use std::sync::{Mutex, Arc};
 use std::cell::RefCell;
+use std::thread;
 
 use zecwalletlitelib::{commands, lightclient::{LightClient, LightClientConfig}};
 
@@ -124,9 +125,17 @@ export! {
               lightclient = lc.borrow().as_ref().unwrap().clone();
           };
 
-          let args = if args_list.is_empty() { vec![] } else { vec![args_list.as_ref()] };
+          if cmd == "sync".to_string() || cmd == "rescan".to_string() {
+            thread::spawn(move || {
+              let args = if args_list.is_empty() { vec![] } else { vec![args_list.as_ref()] };
+              commands::do_user_command(&cmd, &args, lightclient.as_ref());
+            });
 
-          resp = commands::do_user_command(&cmd, &args, lightclient.as_ref()).clone();
+            return format!("OK");
+          } else {
+            let args = if args_list.is_empty() { vec![] } else { vec![args_list.as_ref()] };
+            resp = commands::do_user_command(&cmd, &args, lightclient.as_ref()).clone();
+          }
       };
 
       return resp;
