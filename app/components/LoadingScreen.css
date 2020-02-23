@@ -1,3 +1,9 @@
 .loadingcontainer {
   margin-left: -20%;
 }
+
+.newwalletcontainer {
+  flex-direction: column;
+  width: 85%;
+  text-align: left;
+}
