@@ -81,23 +81,19 @@ const createWindow = async () => {
   mainWindow.on('close', event => {
     // If we are clear to close, then return and allow everything to close
     if (proceedToClose) {
-      console.log('proceed to close, so closing');
       return;
     }
 
     // If we're already waiting for close, then don't allow another close event to actually close the window
     if (waitingForClose) {
-      console.log('waiting for close, so not closing');
       event.preventDefault();
       return;
     }
 
-    console.log('setting waiting for close to true');
     waitingForClose = true;
     event.preventDefault();
 
     ipcMain.on('appquitdone', () => {
-      console.log('received appquitdone, so doign quit');
       waitingForClose = false;
       proceedToClose = true;
       app.quit();
@@ -105,16 +101,15 @@ const createWindow = async () => {
 
     // $FlowFixMe
     mainWindow.webContents.send('appquitting');
-    console.log('send app quit to renderer');
 
-    // Failsafe, timeout after 10 seconds
+    // Failsafe, timeout after 3 seconds
     setTimeout(() => {
       waitingForClose = false;
       proceedToClose = true;
       console.log('timeout, quitting');
 
       app.quit();
-    }, 10 * 1000);
+    }, 3 * 1000);
   });
 
   mainWindow.on('closed', () => {
