@@ -218,7 +218,7 @@ class Sidebar extends PureComponent<Props, State> {
           'Wallet Seed',
           <div className={cstyles.verticalflex}>
             <div>
-              This is your wallet&quot;s seed phrase. It can be used to recover your entire wallet.
+              This is your wallet&rsquo;s seed phrase. It can be used to recover your entire wallet.
               <br />
               PLEASE KEEP IT SAFE!
             </div>
