@@ -99,7 +99,7 @@ class LoadingScreen extends Component<Props, LoadingScreenState> {
       this.setState({ currentStatus: 'Syncing...' });
 
       // This will do the sync in another thread, so we have to check for sync status
-      RPC.Sync();
+      RPC.doSync();
 
       const me = this;
 
