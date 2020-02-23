@@ -105,6 +105,12 @@ export default class MenuBuilder {
             mainWindow.webContents.send('exportall');
           }
         },
+        {
+          label: '&Rescan',
+          click: () => {
+            mainWindow.webContents.send('rescan');
+          }
+        },
         { type: 'separator' },
         {
           label: 'View Lightwalletd Info',
@@ -129,6 +135,18 @@ export default class MenuBuilder {
           label: 'Wallet Seed',
           click: () => {
             mainWindow.webContents.send('seed');
+          }
+        },
+        {
+          label: '&Export All Private Keys',
+          click: () => {
+            mainWindow.webContents.send('exportall');
+          }
+        },
+        {
+          label: '&Rescan',
+          click: () => {
+            mainWindow.webContents.send('rescan');
           }
         },
         {
@@ -164,13 +182,13 @@ export default class MenuBuilder {
         {
           label: 'Check github.com for updates',
           click() {
-            shell.openExternal('https://github.com/adityapk00/zecwallet-electron/releases');
+            shell.openExternal('https://github.com/adityapk00/zecwallet-lite-electron/releases');
           }
         },
         {
           label: 'File a bug...',
           click() {
-            shell.openExternal('https://github.com/adityapk00/zecwallet-electron/issues');
+            shell.openExternal('https://github.com/adityapk00/zecwallet-lite-electron/issues');
           }
         }
       ]
@@ -229,6 +247,12 @@ export default class MenuBuilder {
                   }
                 },
                 {
+                  label: '&Rescan',
+                  click: () => {
+                    mainWindow.webContents.send('rescan');
+                  }
+                },
+                {
                   label: 'Server info',
                   click: () => {
                     this.mainWindow.webContents.send('zcashd');
@@ -246,6 +270,12 @@ export default class MenuBuilder {
                   label: '&Export All Private Keys',
                   click: () => {
                     mainWindow.webContents.send('exportall');
+                  }
+                },
+                {
+                  label: '&Rescan',
+                  click: () => {
+                    mainWindow.webContents.send('rescan');
                   }
                 },
                 {
@@ -274,13 +304,13 @@ export default class MenuBuilder {
           {
             label: 'Check github.com for updates',
             click() {
-              shell.openExternal('https://github.com/adityapk00/zecwallet-electron/releases');
+              shell.openExternal('https://github.com/adityapk00/zecwallet-lite-electron/releases');
             }
           },
           {
             label: 'File a bug...',
             click() {
-              shell.openExternal('https://github.com/adityapk00/zecwallet-electron/issues');
+              shell.openExternal('https://github.com/adityapk00/zecwallet-lite-electron/issues');
             }
           }
         ]

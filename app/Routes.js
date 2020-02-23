@@ -54,6 +54,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
       receivePageState: new ReceivePageState(),
       rpcConfig: new RPCConfig(),
       info: new Info(),
+      rescanning: false,
       location: null,
       errorModalData: new ErrorModalData(),
       passwordState: new PasswordState()
@@ -270,6 +271,10 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ info: newInfo });
   };
 
+  setRescanning = (rescanning: boolean) => {
+    this.setState({ rescanning });
+  };
+
   setInfo = (newInfo: Info) => {
     // If the price is not set in this object, copy it over from the current object
     const { info } = this.state;
@@ -359,6 +364,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
       receivePageState,
       rpcConfig,
       info,
+      rescanning,
       errorModalData,
       passwordState
     } = this.state;
@@ -391,7 +397,9 @@ export default class RouteApp extends React.Component<Props, AppState> {
             <div className={cstyles.sidebarcontainer}>
               <Sidebar
                 info={info}
+                setInfo={this.setInfo}
                 setSendTo={this.setSendTo}
+                setRescanning={this.setRescanning}
                 getPrivKeyAsString={this.getPrivKeyAsString}
                 addresses={addresses}
                 {...standardProps}
@@ -457,7 +465,14 @@ export default class RouteApp extends React.Component<Props, AppState> {
               />
               <Route
                 path={routes.LOADING}
-                render={() => <LoadingScreen setRPCConfig={this.setRPCConfig} setInfo={this.setInfo} />}
+                render={() => (
+                  <LoadingScreen
+                    setRPCConfig={this.setRPCConfig}
+                    rescanning={rescanning}
+                    setRescanning={this.setRescanning}
+                    setInfo={this.setInfo}
+                  />
+                )}
               />
             </Switch>
           </div>

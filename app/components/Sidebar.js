@@ -128,7 +128,9 @@ const SidebarMenuItem = ({ name, routeName, currentRoute, iconname }) => {
 
 type Props = {
   info: Info,
+  setRescanning: boolean => void,
   addresses: string[],
+  setInfo: Info => void,
   setSendTo: (address: string, amount: number | null, memo: string | null) => void,
   getPrivKeyAsString: (address: string) => string,
   history: PropTypes.object.isRequired,
@@ -158,7 +160,15 @@ class Sidebar extends PureComponent<Props, State> {
 
   // Handle menu items
   setupMenuHandlers = async () => {
-    const { info, setSendTo, history, openErrorModal, openPasswordAndUnlockIfNeeded } = this.props;
+    const {
+      info,
+      setSendTo,
+      setInfo,
+      setRescanning,
+      history,
+      openErrorModal,
+      openPasswordAndUnlockIfNeeded
+    } = this.props;
     const { testnet } = info;
 
     // About
@@ -228,6 +238,21 @@ class Sidebar extends PureComponent<Props, State> {
           </div>
         );
       });
+    });
+
+    // Rescan
+    ipcRenderer.on('rescan', () => {
+      // To rescan, we reset the wallet loading
+      // So set info the default, and redirect to the loading screen
+      RPC.doRescan();
+
+      // Set the rescanning global state to true
+      setRescanning(true);
+
+      // Reset the info object, it will be refetched
+      setInfo(new Info());
+
+      history.push(routes.LOADING);
     });
 
     // Export all private keys

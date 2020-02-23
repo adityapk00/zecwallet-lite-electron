@@ -189,6 +189,9 @@ export default class AppState {
   // getinfo and getblockchaininfo result
   info: Info;
 
+  // Is the app rescanning?
+  rescanning: boolean;
+
   // Callbacks for the password dialog box
   passwordState: PasswordState;
 }
