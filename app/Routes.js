@@ -357,6 +357,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
       addressBook,
       sendPageState,
       receivePageState,
+      rpcConfig,
       info,
       errorModalData,
       passwordState
@@ -450,7 +451,10 @@ export default class RouteApp extends React.Component<Props, AppState> {
                 path={routes.TRANSACTIONS}
                 render={() => <Transactions transactions={transactions} info={info} addressBook={addressBook} />}
               />
-              <Route path={routes.ZCASHD} render={() => <Zcashd info={info} refresh={this.doRefresh} />} />
+              <Route
+                path={routes.ZCASHD}
+                render={() => <Zcashd info={info} rpcConfig={rpcConfig} refresh={this.doRefresh} />}
+              />
               <Route
                 path={routes.LOADING}
                 render={() => <LoadingScreen setRPCConfig={this.setRPCConfig} setInfo={this.setInfo} />}

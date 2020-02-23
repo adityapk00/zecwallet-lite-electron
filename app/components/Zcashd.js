@@ -22,7 +22,8 @@ type Props = {
 
 export default class Zcashd extends Component<Props> {
   render() {
-    const { info, refresh } = this.props;
+    const { info, rpcConfig, refresh } = this.props;
+    const { url } = rpcConfig;
 
     if (!info || !info.version) {
       return (
@@ -54,10 +55,9 @@ export default class Zcashd extends Component<Props> {
               <div className={styles.detailcontainer}>
                 <div className={styles.detaillines}>
                   <DetailLine label="version" value={info.version} />
+                  <DetailLine label="Lightwallet Server" value={url} />
                   <DetailLine label="Network" value={info.testnet ? 'Testnet' : 'Mainnet'} />
                   <DetailLine label="Block Height" value={height} />
-                  <DetailLine label="Connections" value={info.connections} />
-                  <DetailLine label="Network Solution Rate" value={`${info.solps} Sol/s`} />
                 </div>
               </div>
 
