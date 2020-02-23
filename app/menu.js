@@ -114,13 +114,6 @@ export default class MenuBuilder {
         },
         { type: 'separator' },
         {
-          label: 'Reload',
-          accelerator: 'Command+R',
-          click: () => {
-            this.mainWindow.webContents.reload();
-          }
-        },
-        {
           label: 'Toggle Developer Tools',
           accelerator: 'Alt+Command+I',
           click: () => {
@@ -226,13 +219,6 @@ export default class MenuBuilder {
                   label: '&Export All Private Keys',
                   click: () => {
                     mainWindow.webContents.send('exportall');
-                  }
-                },
-                {
-                  label: '&Reload',
-                  accelerator: 'Ctrl+R',
-                  click: () => {
-                    this.mainWindow.webContents.reload();
                   }
                 },
                 {
