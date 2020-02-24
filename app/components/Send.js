@@ -158,10 +158,12 @@ const ToAddrBox = ({
 function getSendManyJSON(sendPageState: SendPageState): [] {
   const json = sendPageState.toaddrs.map(to => {
     const memo = to.memo || '';
+    const amount = parseInt((parseFloat(to.amount) * 10 ** 8).toFixed(0));
+
     if (memo === '') {
-      return { address: to.to, amount: parseFloat(to.amount) * 10 ** 8 };
+      return { address: to.to, amount };
     } else {
-      return { address: to.to, amount: parseFloat(to.amount) * 10 ** 8, memo };
+      return { address: to.to, amount, memo };
     }
   });
 
