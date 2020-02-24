@@ -9,7 +9,6 @@
 import React, { PureComponent } from 'react';
 import Modal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
-import hex from 'hex-string';
 import styles from './Send.css';
 import cstyles from './Common.css';
 import { ToAddr, AddressBalance, SendPageState, Info, AddressBookEntry } from './AppState';
@@ -158,8 +157,7 @@ const ToAddrBox = ({
 
 function getSendManyJSON(sendPageState: SendPageState): [] {
   const json = sendPageState.toaddrs.map(to => {
-    const textEncoder = new TextEncoder();
-    const memo = to.memo ? hex.encode(textEncoder.encode(to.memo)) : '';
+    const memo = to.memo || '';
     if (memo === '') {
       return { address: to.to, amount: parseFloat(to.amount) * 10 ** 8 };
     } else {
