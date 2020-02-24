@@ -10,7 +10,7 @@
         "npm_config_disturl": "https://atom.io/download/electron",
         "npm_config_runtime": "electron",
         "npm_config_build_from_source": "true",
-        "npm_config_devdir": "/Users/adityapk/.electron-gyp"
+        "npm_config_devdir": "/home/adityapk/.electron-gyp"
       }
     }
   }
