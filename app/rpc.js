@@ -204,7 +204,7 @@ export default class RPC {
         type === 'sent' ? (tx.outgoing_metadata.length > 0 ? tx.outgoing_metadata[0].address : '') : tx.address;
       transaction.type = type;
       transaction.amount = tx.amount / 10 ** 8;
-      transaction.confirmations = latestBlockHeight - tx.block_height;
+      transaction.confirmations = latestBlockHeight - tx.block_height + 1;
       transaction.txid = tx.txid;
       transaction.time = tx.datetime;
       if (tx.outgoing_metadata) {
