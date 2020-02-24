@@ -81,18 +81,40 @@
       ]
     },
     "win": {
+      "icon": "./resources/icon.ico",
       "target": [
-        "nsis",
+        "zip",
         "msi"
       ]
     },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "./configs/entitlements.mac.inherit.plist",
+      "target": [
+        "dmg"
+      ],
+      "icon": "./resources/icon.icns"
+    },
+    "deb": {
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3"
+      ]
+    },
     "linux": {
+      "category": "Development",
+      "icon": "./resources/icon.icns",
       "target": [
         "deb",
         "rpm",
         "AppImage"
-      ],
-      "category": "Development"
+      ]
     },
     "directories": {
       "buildResources": "resources",
@@ -278,7 +300,8 @@
     "react-select": "^3.0.8",
     "react-tabs": "^3.1.0",
     "react-textarea-autosize": "^7.1.2",
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.16",
+    "typeface-roboto": "^0.0.75"
   },
   "devEngines": {
     "node": ">=7.x",
