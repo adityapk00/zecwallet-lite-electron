@@ -226,6 +226,8 @@ export default class RPC {
       return transaction;
     });
 
+    txlist.sort((t1, t2) => t1.confirmations - t2.confirmations);
+
     this.fnSetTransactionsList(txlist);
   }
 
