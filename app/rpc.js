@@ -261,6 +261,9 @@ export default class RPC {
         'Successfully Broadcast Transaction',
         `Transaction was successfully broadcast. TXID: ${txid}`
       );
+
+      // And refresh data (full refresh)
+      this.refresh(null);
     }
 
     return true;
