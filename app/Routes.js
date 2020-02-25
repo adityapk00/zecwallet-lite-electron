@@ -163,19 +163,23 @@ export default class RouteApp extends React.Component<Props, AppState> {
   };
 
   unlockWallet = async (password: string): boolean => {
-    const success = await RPC.unlockWallet(password);
+    const success = await this.rpc.unlockWallet(password);
 
-    if (success) {
-      // Update the wallet state
-      const { info } = this.state;
+    return success;
+  };
 
-      const newInfo = new Info();
-      Object.assign(newInfo, info);
-      newInfo.locked = false;
+  lockWallet = async (): boolean => {
+    const success = await this.rpc.lockWallet();
+    return success;
+  };
 
-      this.setState({ info: newInfo });
-    }
+  encryptWallet = async (password): boolean => {
+    const success = await this.rpc.encryptWallet(password);
+    return success;
+  };
 
+  decryptWallet = async (password): boolean => {
+    const success = await this.rpc.decryptWallet(password);
     return success;
   };
 
@@ -388,6 +392,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
 
         <PasswordModal
           modalIsOpen={passwordState.showPassword}
+          confirmNeeded={passwordState.confirmNeeded}
           passwordCallback={passwordState.passwordCallback}
           closeCallback={passwordState.closeCallback}
         />
@@ -402,6 +407,10 @@ export default class RouteApp extends React.Component<Props, AppState> {
                 setRescanning={this.setRescanning}
                 getPrivKeyAsString={this.getPrivKeyAsString}
                 addresses={addresses}
+                lockWallet={this.lockWallet}
+                encryptWallet={this.encryptWallet}
+                decryptWallet={this.decryptWallet}
+                openPassword={this.openPassword}
                 {...standardProps}
               />
             </div>

@@ -44,6 +44,10 @@ export default class PasswordModal extends PureComponent<Props, State> {
     const { modalIsOpen, confirmNeeded } = this.props;
     const { password, confirmPassword } = this.state;
 
+    const enabled = !confirmNeeded || password === confirmPassword;
+
+    console.log(`confirmneeded: ${confirmNeeded}: ${enabled}`);
+
     return (
       <Modal
         isOpen={modalIsOpen}
@@ -56,7 +60,8 @@ export default class PasswordModal extends PureComponent<Props, State> {
             Enter Wallet Password
           </div>
 
-          <div className={cstyles.well} style={{ textAlign: 'center' }}>
+          <div className={cstyles.well} style={{ textAlign: 'left' }}>
+            <div className={cstyles.sublight}>Password</div>
             <input
               type="password"
               className={[cstyles.inputbox, cstyles.marginbottomlarge].join(' ')}
@@ -65,17 +70,26 @@ export default class PasswordModal extends PureComponent<Props, State> {
             />
 
             {confirmNeeded && (
-              <input
-                type="password"
-                className={[cstyles.inputbox, cstyles.marginbottomlarge].join(' ')}
-                value={confirmPassword}
-                onChange={e => this.setState({ confirmPassword: e.target.value })}
-              />
+              <div>
+                <div className={cstyles.sublight}>Confirm Password</div>
+                <input
+                  type="password"
+                  className={[cstyles.inputbox, cstyles.marginbottomlarge].join(' ')}
+                  value={confirmPassword}
+                  onChange={e => this.setState({ confirmPassword: e.target.value })}
+                />
+              </div>
             )}
           </div>
 
           <div className={cstyles.buttoncontainer}>
-            <button type="button" className={cstyles.primarybutton} onClick={this.enterButton}>
+            {!enabled && <div className={[cstyles.red].join(' ')}>Passwords do not match</div>}
+            <button
+              type="button"
+              className={[cstyles.primarybutton, cstyles.margintoplarge].join(' ')}
+              onClick={this.enterButton}
+              disabled={!enabled}
+            >
               Enter
             </button>
 

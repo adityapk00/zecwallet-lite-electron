@@ -111,11 +111,29 @@ export default class MenuBuilder {
             mainWindow.webContents.send('rescan');
           }
         },
-        { type: 'separator' },
         {
           label: 'View Lightwalletd Info',
           click: () => {
             this.mainWindow.webContents.send('zcashd');
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Encrypt Wallet',
+          click: () => {
+            this.mainWindow.webContents.send('encrypt');
+          }
+        },
+        {
+          label: 'Remove Wallet Encryption',
+          click: () => {
+            this.mainWindow.webContents.send('decrypt');
+          }
+        },
+        {
+          label: 'Unlock',
+          click: () => {
+            this.mainWindow.webContents.send('unlock');
           }
         },
         { type: 'separator' },
@@ -153,6 +171,25 @@ export default class MenuBuilder {
           label: 'Server info',
           click: () => {
             this.mainWindow.webContents.send('zcashd');
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Encrypt Wallet',
+          click: () => {
+            this.mainWindow.webContents.send('encrypt');
+          }
+        },
+        {
+          label: 'Remove Wallet Encryption',
+          click: () => {
+            this.mainWindow.webContents.send('decrypt');
+          }
+        },
+        {
+          label: 'Unlock',
+          click: () => {
+            this.mainWindow.webContents.send('unlock');
           }
         }
       ]
@@ -224,67 +261,51 @@ export default class MenuBuilder {
       },
       {
         label: '&Wallet',
-        submenu:
-          process.env.NODE_ENV === 'development'
-            ? [
-                {
-                  label: 'Wallet Seed',
-                  click: () => {
-                    mainWindow.webContents.send('seed');
-                  }
-                },
-                {
-                  label: '&Export All Private Keys',
-                  click: () => {
-                    mainWindow.webContents.send('exportall');
-                  }
-                },
-                {
-                  label: 'Toggle &Developer Tools',
-                  accelerator: 'Alt+Ctrl+I',
-                  click: () => {
-                    this.mainWindow.toggleDevTools();
-                  }
-                },
-                {
-                  label: '&Rescan',
-                  click: () => {
-                    mainWindow.webContents.send('rescan');
-                  }
-                },
-                {
-                  label: 'Server info',
-                  click: () => {
-                    this.mainWindow.webContents.send('zcashd');
-                  }
-                }
-              ]
-            : [
-                {
-                  label: 'Wallet Seed',
-                  click: () => {
-                    mainWindow.webContents.send('seed');
-                  }
-                },
-                {
-                  label: '&Export All Private Keys',
-                  click: () => {
-                    mainWindow.webContents.send('exportall');
-                  }
-                },
-                {
-                  label: '&Rescan',
-                  click: () => {
-                    mainWindow.webContents.send('rescan');
-                  }
-                },
-                {
-                  label: 'Server info',
-                  click: () => {
-                    this.mainWindow.webContents.send('zcashd');
-                  }
-                }
-              ]
+        submenu: [
+          {
+            label: 'Wallet Seed',
+            click: () => {
+              mainWindow.webContents.send('seed');
+            }
+          },
+          {
+            label: '&Export All Private Keys',
+            click: () => {
+              mainWindow.webContents.send('exportall');
+            }
+          },
+          {
+            label: '&Rescan',
+            click: () => {
+              mainWindow.webContents.send('rescan');
+            }
+          },
+          {
+            label: 'Server info',
+            click: () => {
+              this.mainWindow.webContents.send('zcashd');
+            }
+          },
+          { type: 'separator' },
+          {
+            label: 'Encrypt Wallet',
+            click: () => {
+              this.mainWindow.webContents.send('encrypt');
+            }
+          },
+          {
+            label: 'Remove Wallet Encryption',
+            click: () => {
+              this.mainWindow.webContents.send('decrypt');
+            }
+          },
+          {
+            label: 'Unlock',
+            click: () => {
+              this.mainWindow.webContents.send('unlock');
+            }
+          }
+        ]
       },
       {
         label: 'Help',

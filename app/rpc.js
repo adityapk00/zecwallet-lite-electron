@@ -269,9 +269,48 @@ export default class RPC {
     return true;
   }
 
-  static async unlockWallet(password: string): boolean {
+  async encryptWallet(password): boolean {
+    const resultStr = native.litelib_execute('encrypt', password);
+    const resultJSON = JSON.parse(resultStr);
+
+    // To update the wallet encryption status
+    this.fetchInfo();
+
+    // And save the wallet
+    RPC.doSave();
+
+    return resultJSON.result === 'success';
+  }
+
+  async decryptWallet(password): boolean {
+    const resultStr = native.litelib_execute('decrypt', password);
+    const resultJSON = JSON.parse(resultStr);
+
+    // To update the wallet encryption status
+    this.fetchInfo();
+
+    // And save the wallet
+    RPC.doSave();
+
+    return resultJSON.result === 'success';
+  }
+
+  async lockWallet(): boolean {
+    const resultStr = native.litelib_execute('lock', '');
+    const resultJSON = JSON.parse(resultStr);
+
+    // To update the wallet encryption status
+    this.fetchInfo();
+
+    return resultJSON.result === 'success';
+  }
+
+  async unlockWallet(password: string): boolean {
     const resultStr = native.litelib_execute('unlock', password);
     const resultJSON = JSON.parse(resultStr);
+
+    // To update the wallet encryption status
+    this.fetchInfo();
 
     return resultJSON.result === 'success';
   }

@@ -135,7 +135,11 @@ type Props = {
   getPrivKeyAsString: (address: string) => string,
   history: PropTypes.object.isRequired,
   openErrorModal: (title: string, body: string) => void,
-  openPasswordAndUnlockIfNeeded: (successCallback: () => void) => void
+  openPassword: (boolean, (string) => void, () => void) => void,
+  openPasswordAndUnlockIfNeeded: (successCallback: () => void) => void,
+  lockWallet: () => void,
+  encryptWallet: string => void,
+  decryptWallet: string => void
 };
 
 type State = {
@@ -160,16 +164,7 @@ class Sidebar extends PureComponent<Props, State> {
 
   // Handle menu items
   setupMenuHandlers = async () => {
-    const {
-      info,
-      setSendTo,
-      setInfo,
-      setRescanning,
-      history,
-      openErrorModal,
-      openPasswordAndUnlockIfNeeded
-    } = this.props;
-    const { testnet } = info;
+    const { setSendTo, setInfo, setRescanning, history, openErrorModal, openPasswordAndUnlockIfNeeded } = this.props;
 
     // About
     ipcRenderer.on('about', () => {
@@ -205,10 +200,12 @@ class Sidebar extends PureComponent<Props, State> {
 
     // Donate button
     ipcRenderer.on('donate', () => {
+      const { info } = this.props;
+
       setSendTo(
-        Utils.getDonationAddress(testnet),
-        Utils.getDefaultDonationAmount(testnet),
-        Utils.getDefaultDonationMemo(testnet)
+        Utils.getDonationAddress(info.testnet),
+        Utils.getDefaultDonationAmount(info.testnet),
+        Utils.getDefaultDonationMemo(info.testnet)
       );
 
       history.push(routes.SEND);
@@ -238,6 +235,70 @@ class Sidebar extends PureComponent<Props, State> {
           </div>
         );
       });
+    });
+
+    // Encrypt wallet
+    ipcRenderer.on('encrypt', async () => {
+      const { info, lockWallet, encryptWallet, openPassword } = this.props;
+
+      if (info.encrypted && info.locked) {
+        openErrorModal('Already Encrypted', 'Your wallet is already encrypted and locked.');
+      } else if (info.encrypted && !info.locked) {
+        await lockWallet();
+        openErrorModal('Locked', 'Your wallet has been locked. A password will be needed to spend funds.');
+      } else {
+        // Encrypt the wallet
+        openPassword(
+          true,
+          async password => {
+            await encryptWallet(password);
+            openErrorModal('Encrypted', 'Your wallet has been encrypted. The password will be needed to spend funds.');
+          },
+          () => {
+            openErrorModal('Cancelled', 'Your wallet was not encrypted.');
+          }
+        );
+      }
+    });
+
+    // Remove wallet encryption
+    ipcRenderer.on('decrypt', async () => {
+      const { info, decryptWallet, openPassword } = this.props;
+
+      if (!info.encrypted) {
+        openErrorModal('Not Encrypted', 'Your wallet is not encrypted and ready for spending.');
+      } else {
+        // Remove the wallet remove the wallet encryption
+        openPassword(
+          false,
+          async password => {
+            const success = await decryptWallet(password);
+            if (success) {
+              openErrorModal(
+                'Decrypted',
+                `Your wallet's encryption has been removed. A password will no longer be needed to spend funds.`
+              );
+            } else {
+              openErrorModal('Decryption Failed', 'Wallet decryption failed. Do you have the right password?');
+            }
+          },
+          () => {
+            openErrorModal('Cancelled', 'Your wallet is still encrypted.');
+          }
+        );
+      }
+    });
+
+    // Unlock wallet
+    ipcRenderer.on('unlock', () => {
+      const { info } = this.props;
+      if (!info.encrypted || !info.locked) {
+        openErrorModal('Already Unlocked', 'Your wallet is already unlocked for spending');
+      } else {
+        openPasswordAndUnlockIfNeeded(async () => {
+          openErrorModal('Unlocked', 'Your wallet is unlocked for spending');
+        });
+      }
     });
 
     // Rescan
