@@ -233,7 +233,7 @@ class Sidebar extends PureComponent<Props, State> {
               PLEASE KEEP IT SAFE!
             </div>
             <hr />
-            <div>{seed}</div>
+            <div style={{ wordBreak: 'break-word', fontFamily: 'monospace, Roboto' }}>{seed}</div>
             <hr />
           </div>
         );
