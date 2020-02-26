@@ -26,11 +26,25 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      - name: yarn install
+        run: |
+          yarn install
+      - name: Build and Package@Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          yarn package-linux
       - name: Version
         run: |
           ./bin/printversion.sh
-      - name: Upload artifacts
+      - name: Upload artifacts-deb
         uses: actions/upload-artifact@v1
+        if: contains(matrix.os, 'ubuntu')
         with:
           name: ${{ matrix.os }}
           path: release/Zecwallet_Lite_${{ env.VERSION }}_amd64.deb
+      - name: Upload artifacts-AppImage
+        uses: actions/upload-artifact@v1
+        if: contains(matrix.os, 'ubuntu')
+        with:
+          name: ${{ matrix.os }}
+          path: release/Zecwallet Lite-${{ env.VERSION }}.AppImage

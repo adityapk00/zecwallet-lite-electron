@@ -6639,11 +6639,6 @@ hex-color-regex@^1.1.0:
   resolved "https://registry.yarnpkg.com/hex-color-regex/-/hex-color-regex-1.1.0.tgz#4c06fccb4602fe2602b3c93df82d7e7dbf1a8a8e"
   integrity sha512-l9sfDFsuqtOqKDsQdqrMRk0U85RZc0RtOR9yPI7mRVOa4FsR/BVnZ0shmQRM96Ji99kYZP/7hn1cedc1+ApsTQ==
 
-hex-string@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/hex-string/-/hex-string-1.0.3.tgz#e90b2eaaba1f5661670c56e0c2877f49b661fefd"
-  integrity sha512-nnSDAUKRJ+LZwt44GCwu/JIkFr2gYB6RMX7toUlx3RAOLn/gfiLVQjSovlgTzTu7zxBPUzAme/0MPHR0kMGQ8g==
-
 highlight.js@^9.3.0:
   version "9.16.2"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.16.2.tgz#68368d039ffe1c6211bcc07e483daf95de3e403e"
