@@ -1,9 +1,3 @@
-.balancebox {
-  margin: 16px;
-  display: flex;
-  justify-content: space-between;
-}
-
 .addressbalancecontainer {
   display: flex;
   flex-direction: column;

@@ -16,41 +16,7 @@ import cstyles from './Common.css';
 import { TotalBalance, Info, AddressBalance } from './AppState';
 import Utils from '../utils/utils';
 import ScrollPane from './ScrollPane';
-
-// $FlowFixMe
-export const BalanceBlockHighlight = ({ zecValue, usdValue, currencyName }) => {
-  const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(zecValue);
-
-  return (
-    <div style={{ padding: '1em' }}>
-      <div className={[cstyles.highlight, cstyles.xlarge].join(' ')}>
-        <span>
-          {currencyName} {bigPart}
-        </span>
-        <span className={[cstyles.small, cstyles.zecsmallpart].join(' ')}>{smallPart}</span>
-      </div>
-      <div className={[cstyles.sublight, cstyles.small].join(' ')}>{usdValue}</div>
-    </div>
-  );
-};
-
-// eslint-disable-next-line react/prop-types
-const BalanceBlock = ({ zecValue, usdValue, topLabel, currencyName }) => {
-  const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(zecValue);
-
-  return (
-    <div className={cstyles.padall}>
-      <div className={[styles.sublight, styles.small].join(' ')}>{topLabel}</div>
-      <div className={[cstyles.highlight, cstyles.large].join(' ')}>
-        <span>
-          {currencyName} {bigPart}
-        </span>
-        <span className={[cstyles.small, cstyles.zecsmallpart].join(' ')}>{smallPart}</span>
-      </div>
-      <div className={[cstyles.sublight, cstyles.small].join(' ')}>{usdValue}</div>
-    </div>
-  );
-};
+import { BalanceBlockHighlight, BalanceBlock } from './BalanceBlocks';
 
 const AddressBalanceItem = ({ currencyName, zecPrice, item }) => {
   const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(Math.abs(item.balance));
@@ -92,7 +58,7 @@ export default class Home extends Component<Props> {
 
     return (
       <div>
-        <div className={[cstyles.well, styles.balancebox].join(' ')}>
+        <div className={[cstyles.well, cstyles.balancebox].join(' ')}>
           <BalanceBlockHighlight
             zecValue={totalBalance.total}
             usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.total)}

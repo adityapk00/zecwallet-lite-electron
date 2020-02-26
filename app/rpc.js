@@ -139,6 +139,7 @@ export default class RPC {
     const balance = new TotalBalance();
     balance.private = balanceJSON.zbalance / 10 ** 8;
     balance.transparent = balanceJSON.tbalance / 10 ** 8;
+    balance.verifiedPrivate = balanceJSON.verified_zbalance / 10 ** 8;
     balance.total = balance.private + balance.transparent;
 
     this.fnSetTotalBalance(balance);

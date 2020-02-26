@@ -7,6 +7,7 @@ type PaneState = {
 
 type Props = {
   children: PropTypes.node.isRequired,
+  className: PropTypes.node.isRequired,
   offsetHeight: number
 };
 
@@ -36,11 +37,11 @@ export default class ScrollPane extends Component<Props, PaneState> {
   }
 
   render() {
-    const { children } = this.props;
+    const { children, className } = this.props;
     const { height } = this.state;
 
     return (
-      <div style={{ overflowY: 'auto', overflowX: 'hidden', height }}>
+      <div className={className} style={{ overflowY: 'auto', overflowX: 'hidden', height }}>
         {children}
       </div>
     );

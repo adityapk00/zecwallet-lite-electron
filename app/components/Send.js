@@ -11,11 +11,12 @@ import Modal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
 import styles from './Send.css';
 import cstyles from './Common.css';
-import { ToAddr, AddressBalance, SendPageState, Info, AddressBookEntry } from './AppState';
+import { ToAddr, AddressBalance, SendPageState, Info, AddressBookEntry, TotalBalance } from './AppState';
 import Utils from '../utils/utils';
 import ScrollPane from './ScrollPane';
 import ArrowUpLight from '../assets/img/arrow_up_dark.png';
 import { ErrorModal } from './ErrorModal';
+import { BalanceBlockHighlight } from './BalanceBlocks';
 
 type OptionType = {
   value: string,
@@ -81,7 +82,9 @@ const ToAddrBox = ({
       return;
     }
 
-    updateToField(toaddr.id, null, null, `${toaddr.memo}\nReply-To:\n${fromAddress}`);
+    if (fromAddress) {
+      updateToField(toaddr.id, null, null, `${toaddr.memo}\nReply-To:\n${fromAddress}`);
+    }
   };
 
   return (
@@ -297,7 +300,8 @@ const ConfirmModal = ({
 };
 
 type Props = {
-  addressesWithBalance: AddressBalance[],
+  addresses: string[],
+  totalBalance: TotalBalance,
   addressBook: AddressBookEntry[],
   sendPageState: SendPageState,
   sendTransaction: (sendJson: [], (string, string) => void) => void,
@@ -472,32 +476,40 @@ export default class Send extends PureComponent<Props, SendState> {
   render() {
     const { modalIsOpen, errorModalIsOpen, errorModalTitle, errorModalBody, sendButtonEnabled } = this.state;
     const {
-      addressesWithBalance,
+      addresses,
       sendTransaction,
       sendPageState,
       info,
+      totalBalance,
       openErrorModal,
       closeErrorModal,
       openPasswordAndUnlockIfNeeded
     } = this.props;
 
-    // Find the fromaddress
-    let fromaddr = {};
-    if (sendPageState.fromaddr) {
-      fromaddr = {
-        value: sendPageState.fromaddr,
-        label: this.getLabelForFromAddress(sendPageState.fromaddr, addressesWithBalance, info.currencyName)
-      };
-    }
-
-    const totalAmountAvailable = this.getBalanceForAddress(fromaddr.value, addressesWithBalance);
+    const totalAmountAvailable = totalBalance.transparent + totalBalance.verifiedPrivate;
+    const fromaddr = addresses.find(a => Utils.isSapling(a));
 
     return (
       <div>
         <div className={[cstyles.xlarge, cstyles.padall, cstyles.center].join(' ')}>Send</div>
 
         <div className={styles.sendcontainer}>
-          <ScrollPane offsetHeight={150}>
+          <div className={[cstyles.well, cstyles.balancebox].join(' ')}>
+            <BalanceBlockHighlight
+              topLabel="Confirmed Funds"
+              zecValue={totalAmountAvailable}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalAmountAvailable)}
+              currencyName={info.currencyName}
+            />
+            <BalanceBlockHighlight
+              topLabel="All Funds"
+              zecValue={totalBalance.total}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalAmountAvailable)}
+              currencyName={info.currencyName}
+            />
+          </div>
+
+          <ScrollPane className={cstyles.containermargin} offsetHeight={250}>
             {sendPageState.toaddrs.map(toaddr => {
               return (
                 <ToAddrBox
@@ -505,7 +517,7 @@ export default class Send extends PureComponent<Props, SendState> {
                   toaddr={toaddr}
                   zecPrice={info.zecPrice}
                   updateToField={this.updateToField}
-                  fromAddress={fromaddr.value}
+                  fromAddress={fromaddr}
                   fromAmount={totalAmountAvailable}
                   setMaxAmount={this.setMaxAmount}
                   setSendButtonEnable={this.setSendButtonEnable}

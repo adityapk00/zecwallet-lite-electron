@@ -421,10 +421,11 @@ export default class RouteApp extends React.Component<Props, AppState> {
                 path={routes.SEND}
                 render={() => (
                   <Send
-                    addressesWithBalance={addressesWithBalance}
+                    addresses={addresses}
                     sendTransaction={this.sendTransaction}
                     sendPageState={sendPageState}
                     setSendPageState={this.setSendPageState}
+                    totalBalance={totalBalance}
                     addressBook={addressBook}
                     {...standardProps}
                   />

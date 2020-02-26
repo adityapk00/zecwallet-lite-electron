@@ -7,13 +7,13 @@ export class TotalBalance {
   // Total t address, unconfirmed
   unconfirmedTransparent: number;
 
-  // Total private, confirmed + spendable
+  // Total private, confirmed + unconfirmed
   private: number;
 
-  // Total private, unconfirmed or not spendable
-  unconfirmedPrivate: number;
+  // Total private, confirmed funds that are spendable
+  verifiedPrivate: number;
 
-  // Total confirmed + spendable
+  // Total unconfirmed + spendable
   total: number;
 }
 
