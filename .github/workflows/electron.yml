@@ -34,7 +34,7 @@ jobs:
           yarn package-linux
       - name: Version
         run: |
-          ./bin/printversion.h
+          ./bin/printversion.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
