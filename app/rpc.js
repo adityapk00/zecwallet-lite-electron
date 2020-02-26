@@ -137,8 +137,8 @@ export default class RPC {
 
     // Total Balance
     const balance = new TotalBalance();
-    balance.private = balanceJSON.tbalance / 10 ** 8;
-    balance.transparent = balanceJSON.zbalance / 10 ** 8;
+    balance.private = balanceJSON.zbalance / 10 ** 8;
+    balance.transparent = balanceJSON.tbalance / 10 ** 8;
     balance.total = balance.private + balance.transparent;
 
     this.fnSetTotalBalance(balance);
