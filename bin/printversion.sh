@@ -1,4 +1,4 @@
 #!/bin/bash
-export VERSION="1.1.0-beta1"
+VERSION="1.1.0-beta1"
 
-echo $VERSION
+echo "::set-env name=VERSION::$VERSION"
