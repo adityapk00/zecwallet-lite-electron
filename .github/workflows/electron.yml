@@ -31,6 +31,8 @@ jobs:
           ./bin/printversion.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
+        env:
+          VERSION: $(./bin/printversion.sh)
         with:
           name: ${{ matrix.os }}
           path: release/Zecwallet_Lite_${{ env.VERSION }}_amd64.deb
