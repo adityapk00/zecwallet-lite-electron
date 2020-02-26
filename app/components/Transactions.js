@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import Modal from 'react-modal';
 import dateformat from 'dateformat';
 import { shell } from 'electron';
-import { BalanceBlockHighlight } from './Dashboard';
+import { BalanceBlockHighlight } from './BalanceBlocks';
 import styles from './Transactions.css';
 import cstyles from './Common.css';
 import { Transaction, Info } from './AppState';
