@@ -107,14 +107,13 @@
         "libxtst6",
         "libnss3"
       ],
-      "artifactName": "Zecwallet_Fullnode_${version}_${arch}.deb"
+      "artifactName": "Zecwallet_Lite_${version}_${arch}.deb"
     },
     "linux": {
       "category": "Development",
       "icon": "./resources/icon.icns",
       "target": [
         "deb",
-        "rpm",
         "AppImage"
       ]
     },

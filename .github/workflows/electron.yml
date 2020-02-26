@@ -29,9 +29,12 @@ jobs:
       - name: yarn install
         run: |
           yarn install
-      - name: Publish
+      - name: Build and Package
         run: |
           yarn package-linux
+      - name: Version
+        run: |
+          ./bin/printversion.h
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
