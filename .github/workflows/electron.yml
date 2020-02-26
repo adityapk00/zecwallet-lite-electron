@@ -26,12 +26,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: yarn install
-        run: |
-          yarn install
-      - name: Build and Package
-        run: |
-          yarn package-linux
       - name: Version
         run: |
           ./bin/printversion.sh
@@ -39,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: ${{ matrix.os }}
-          path: release/zecwallet-{{ env.VERSION }}.tar.gz
+          path: release/Zecwallet_Lite_${{ env.VERSION }}_amd64.deb
