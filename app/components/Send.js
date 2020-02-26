@@ -509,7 +509,7 @@ export default class Send extends PureComponent<Props, SendState> {
             />
           </div>
 
-          <ScrollPane className={cstyles.containermargin} offsetHeight={250}>
+          <ScrollPane className={cstyles.containermargin} offsetHeight={320}>
             {sendPageState.toaddrs.map(toaddr => {
               return (
                 <ToAddrBox
