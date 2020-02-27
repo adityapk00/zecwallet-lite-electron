@@ -10,7 +10,7 @@ import { RPCConfig, Info } from './AppState';
 import RPC from '../rpc';
 import cstyles from './Common.css';
 import styles from './LoadingScreen.css';
-import Logo from '../assets/img/logobig.gif';
+import Logo from '../assets/img/logobig.png';
 
 type Props = {
   setRPCConfig: (rpcConfig: RPCConfig) => void,
