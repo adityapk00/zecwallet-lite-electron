@@ -286,12 +286,12 @@ export default class MenuBuilder {
               this.mainWindow.webContents.send('zcashd');
             }
           },
-          {
-            label: 'Devtools',
-            click: () => {
-              mainWindow.webContents.openDevTools();
-            }
-          },
+          // {
+          //   label: 'Devtools',
+          //   click: () => {
+          //     mainWindow.webContents.openDevTools();
+          //   }
+          // },
           { type: 'separator' },
           {
             label: 'Encrypt Wallet',
