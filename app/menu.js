@@ -135,15 +135,15 @@ export default class MenuBuilder {
           click: () => {
             this.mainWindow.webContents.send('unlock');
           }
-        },
-        { type: 'separator' },
-        {
-          label: 'Toggle Developer Tools',
-          accelerator: 'Alt+Command+I',
-          click: () => {
-            this.mainWindow.toggleDevTools();
-          }
         }
+        // { type: 'separator' },
+        // {
+        //   label: 'Toggle Developer Tools',
+        //   accelerator: 'Alt+Command+I',
+        //   click: () => {
+        //     this.mainWindow.toggleDevTools();
+        //   }
+        // }
       ]
     };
     const subMenuViewProd = {
