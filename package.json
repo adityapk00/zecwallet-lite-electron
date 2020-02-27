@@ -254,7 +254,6 @@
     "mini-css-extract-plugin": "^0.8.0",
     "neon": "^2.0.0",
     "neon-cli": "^0.3.3",
-    "node-loader": "^0.6.0",
     "node-sass": "^4.13.1",
     "opencollective-postinstall": "^2.0.2",
     "optimize-css-assets-webpack-plugin": "^5.0.3",

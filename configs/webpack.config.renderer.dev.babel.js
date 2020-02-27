@@ -197,7 +197,14 @@ export default merge.smart(baseConfig, {
       },
       {
         test: /\.node$/,
-        use: 'node-loader'
+        use: [
+          {
+            loader: path.resolve('./internals/scripts/NativeLoader.js'),
+            options: {
+              name: '[name]-[hash].[ext]'
+            }
+          }
+        ]
       }
     ]
   },
