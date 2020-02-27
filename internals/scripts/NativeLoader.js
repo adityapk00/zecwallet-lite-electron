@@ -12,9 +12,14 @@ module.exports = function(content) {
     context: loaderOptions.context || this.rootContext || (this.config && this.config.context)
   });
 
-  let requirePath = path.posix.relative(from, name);
-  if (requirePath[0] !== '.') {
-    requirePath = './dist/' + requirePath;
+  let requirePath;
+  if (process.env.NODE_ENV === 'production') {
+    requirePath = path.posix.relative(from, name);
+    if (requirePath[0] !== '.') {
+      requirePath = './dist/' + requirePath;
+    }
+  } else {
+    requirePath = '../native/index.node';
   }
 
   console.log(`Require path: ${requirePath}`);
