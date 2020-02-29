@@ -11,7 +11,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import styles from './Sidebar.css';
 import cstyles from './Common.css';
 import routes from '../constants/routes.json';
-import Logo from '../assets/img/logobig.gif';
+import Logo from '../assets/img/logobig.png';
 import { Info } from './AppState';
 import Utils from '../utils/utils';
 import RPC from '../rpc';
