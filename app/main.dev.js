@@ -1,3 +1,4 @@
+/* eslint-disable compat/compat */
 /* eslint global-require: off */
 
 /**
@@ -11,15 +12,12 @@
  * @flow
  */
 import { app, shell, BrowserWindow, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    // autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
@@ -98,6 +96,7 @@ const createWindow = async () => {
 
     // If we're already waiting for close, then don't allow another close event to actually close the window
     if (waitingForClose) {
+      console.log('Waiting for close... Timeout in 10s');
       event.preventDefault();
       return;
     }
@@ -118,7 +117,7 @@ const createWindow = async () => {
     setTimeout(() => {
       waitingForClose = false;
       proceedToClose = true;
-      console.log('timeout, quitting');
+      console.log('Timeout, quitting');
 
       app.quit();
     }, 3 * 1000);
