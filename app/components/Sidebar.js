@@ -335,6 +335,11 @@ class Sidebar extends PureComponent<Props, State> {
     ipcRenderer.on('zcashd', () => {
       history.push(routes.ZCASHD);
     });
+
+    // Connect mobile app
+    ipcRenderer.on('connectmobile', () => {
+      history.push(routes.CONNECTMOBILE);
+    });
   };
 
   closeExportPrivKeysModal = () => {

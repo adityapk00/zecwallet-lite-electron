@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import axios from 'axios';
 import { TotalBalance, AddressBalance, Transaction, RPCConfig, TxDetail, Info } from './components/AppState';
 import native from '../native/index.node';
@@ -14,9 +15,6 @@ export default class RPC {
   fnSetTransactionsList: (Transaction[]) => void;
 
   fnSetAllAddresses: (string[]) => void;
-
-  // This function is not set via a constructor, but via the sendTransaction method
-  fnOpenSendErrorModal: (string, string) => void;
 
   fnSetZecPrice: number => void;
 

@@ -154,6 +154,12 @@ export class PasswordState {
   }
 }
 
+export class ConnectedCompanionApp {
+  name: string;
+
+  lastSeen: number;
+}
+
 // eslint-disable-next-line max-classes-per-file
 export default class AppState {
   // The total confirmed and unconfirmed balance in this wallet
@@ -194,4 +200,7 @@ export default class AppState {
 
   // Callbacks for the password dialog box
   passwordState: PasswordState;
+
+  // The last seen connected companion app
+  connectedCompanionApp: ConnectedCompanionApp;
 }

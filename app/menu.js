@@ -117,6 +117,12 @@ export default class MenuBuilder {
             this.mainWindow.webContents.send('zcashd');
           }
         },
+        {
+          label: 'Connect Mobile App',
+          click: () => {
+            this.mainWindow.webContents.send('connectmobile');
+          }
+        },
         { type: 'separator' },
         {
           label: 'Encrypt Wallet',
@@ -171,6 +177,12 @@ export default class MenuBuilder {
           label: 'Server info',
           click: () => {
             this.mainWindow.webContents.send('zcashd');
+          }
+        },
+        {
+          label: 'Connect Mobile App',
+          click: () => {
+            this.mainWindow.webContents.send('connectmobile');
           }
         },
         { type: 'separator' },
@@ -284,6 +296,12 @@ export default class MenuBuilder {
             label: 'Server info',
             click: () => {
               this.mainWindow.webContents.send('zcashd');
+            }
+          },
+          {
+            label: 'Connect Mobile App',
+            click: () => {
+              this.mainWindow.webContents.send('connectmobile');
             }
           },
           // {
