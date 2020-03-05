@@ -509,7 +509,7 @@ export default class Send extends PureComponent<Props, SendState> {
         <div className={[cstyles.xlarge, cstyles.padall, cstyles.center].join(' ')}>Send</div>
 
         <div className={styles.sendcontainer}>
-          <div className={[cstyles.well, cstyles.balancebox].join(' ')}>
+          <div className={[cstyles.well, cstyles.balancebox, cstyles.containermargin].join(' ')}>
             <BalanceBlockHighlight
               topLabel="Confirmed Funds"
               zecValue={totalAmountAvailable}
