@@ -141,11 +141,15 @@ export default class RouteApp extends React.Component<Props, AppState> {
     // Set the callbacks, but before calling them back, we close the modals
     passwordState.passwordCallback = (password: string) => {
       this.setState({ passwordState: new PasswordState() });
-      passwordCallback(password);
+
+      // Call the callback after a bit, so as to give time to the modal to close
+      setTimeout(() => passwordCallback(password), 10);
     };
     passwordState.closeCallback = () => {
       this.setState({ passwordState: new PasswordState() });
-      closeCallback();
+
+      // Call the callback after a bit, so as to give time to the modal to close
+      setTimeout(() => closeCallback(), 10);
     };
 
     this.setState({ passwordState });
