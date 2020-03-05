@@ -519,7 +519,7 @@ export default class Send extends PureComponent<Props, SendState> {
             <BalanceBlockHighlight
               topLabel="All Funds"
               zecValue={totalBalance.total}
-              usdValue={Utils.getZecToUsdString(info.zecPrice, totalAmountAvailable)}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.total)}
               currencyName={info.currencyName}
             />
           </div>
