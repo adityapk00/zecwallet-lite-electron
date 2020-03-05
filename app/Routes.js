@@ -126,11 +126,17 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ errorModalData });
   };
 
-  openPassword = (confirmNeeded: boolean, passwordCallback: string => void, closeCallback: () => void) => {
+  openPassword = (
+    confirmNeeded: boolean,
+    passwordCallback: string => void,
+    closeCallback: () => void,
+    helpText: string
+  ) => {
     const passwordState = new PasswordState();
 
     passwordState.showPassword = true;
     passwordState.confirmNeeded = confirmNeeded;
+    passwordState.helpText = helpText;
 
     // Set the callbacks, but before calling them back, we close the modals
     passwordState.passwordCallback = (password: string) => {
@@ -421,6 +427,7 @@ export default class RouteApp extends React.Component<Props, AppState> {
           confirmNeeded={passwordState.confirmNeeded}
           passwordCallback={passwordState.passwordCallback}
           closeCallback={passwordState.closeCallback}
+          helpText={passwordState.helpText}
         />
 
         <div style={{ overflow: 'hidden' }}>

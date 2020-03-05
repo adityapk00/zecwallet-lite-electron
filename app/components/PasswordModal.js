@@ -1,3 +1,4 @@
+// @flow
 import React, { PureComponent } from 'react';
 import Modal from 'react-modal';
 import cstyles from './Common.css';
@@ -6,7 +7,8 @@ type Props = {
   modalIsOpen: boolean,
   confirmNeeded: boolean,
   passwordCallback: (password: string) => void,
-  closeCallback: () => void
+  closeCallback: () => void,
+  helpText: string | null
 };
 
 type State = {
@@ -41,12 +43,10 @@ export default class PasswordModal extends PureComponent<Props, State> {
   };
 
   render() {
-    const { modalIsOpen, confirmNeeded } = this.props;
+    const { modalIsOpen, confirmNeeded, helpText } = this.props;
     const { password, confirmPassword } = this.state;
 
     const enabled = !confirmNeeded || password === confirmPassword;
-
-    console.log(`confirmneeded: ${confirmNeeded}: ${enabled}`);
 
     return (
       <Modal
@@ -56,8 +56,9 @@ export default class PasswordModal extends PureComponent<Props, State> {
         overlayClassName={cstyles.modalOverlay}
       >
         <div className={[cstyles.verticalflex].join(' ')}>
-          <div className={cstyles.marginbottomlarge} style={{ textAlign: 'center' }}>
-            Enter Wallet Password
+          <div className={cstyles.marginbottomlarge} style={{ textAlign: 'left' }}>
+            {helpText && <span>{helpText}</span>}
+            {!helpText && <span>Enter Wallet Password</span>}
           </div>
 
           <div className={cstyles.well} style={{ textAlign: 'left' }}>

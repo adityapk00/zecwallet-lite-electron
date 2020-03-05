@@ -1,6 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/prop-types */
 import React, { PureComponent } from 'react';
+import type { Element } from 'react';
 import url from 'url';
 import querystring from 'querystring';
 import Modal from 'react-modal';
@@ -8,6 +9,7 @@ import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { ipcRenderer } from 'electron';
 import TextareaAutosize from 'react-textarea-autosize';
+import PropTypes from 'prop-types';
 import styles from './Sidebar.css';
 import cstyles from './Common.css';
 import routes from '../constants/routes.json';
@@ -85,7 +87,9 @@ const PayURIModal = ({
             type="button"
             className={cstyles.primarybutton}
             onClick={() => {
-              actionCallback(modalInput);
+              if (modalInput) {
+                actionCallback(modalInput);
+              }
               closeModal();
             }}
           >
@@ -134,8 +138,8 @@ type Props = {
   setSendTo: (address: string, amount: number | null, memo: string | null) => void,
   getPrivKeyAsString: (address: string) => string,
   history: PropTypes.object.isRequired,
-  openErrorModal: (title: string, body: string) => void,
-  openPassword: (boolean, (string) => void, () => void) => void,
+  openErrorModal: (title: string, body: string | Element<'div'>) => void,
+  openPassword: (boolean, (string) => void, () => void, string) => void,
   openPasswordAndUnlockIfNeeded: (successCallback: () => void) => void,
   lockWallet: () => void,
   encryptWallet: string => void,
@@ -256,7 +260,11 @@ class Sidebar extends PureComponent<Props, State> {
           },
           () => {
             openErrorModal('Cancelled', 'Your wallet was not encrypted.');
-          }
+          },
+          <div>
+            Please enter a password to encrypt your wallet. <br />
+            WARNING: If you forget this password, the only way to recover your wallet is from the seed phrase.
+          </div>
         );
       }
     });

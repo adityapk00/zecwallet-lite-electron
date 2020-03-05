@@ -146,11 +146,14 @@ export class PasswordState {
 
   closeCallback: () => void;
 
+  helpText: string | null;
+
   constructor() {
     this.showPassword = false;
     this.confirmNeeded = false;
     this.passwordCallback = null;
     this.closeCallback = null;
+    this.helpText = null;
   }
 }
 
