@@ -26,7 +26,14 @@ const AddressBalanceItem = ({ currencyName, zecPrice, item }) => {
       <AccordionItemHeading>
         <AccordionItemButton className={cstyles.accordionHeader}>
           <div className={[cstyles.flexspacebetween].join(' ')}>
-            <div>{Utils.splitStringIntoChunks(item.address, 6).join(' ')}</div>
+            <div>
+              <div>{Utils.splitStringIntoChunks(item.address, 6).join(' ')}</div>
+              {item.containsPending && (
+                <div className={[cstyles.red, cstyles.small, cstyles.padtopsmall].join(' ')}>
+                  Some transactions are pending. Balances may change.
+                </div>
+              )}
+            </div>
             <div className={[styles.txamount, cstyles.right].join(' ')}>
               <div>
                 <span>
@@ -56,26 +63,37 @@ export default class Home extends Component<Props> {
   render() {
     const { totalBalance, info, addressesWithBalance } = this.props;
 
+    const anyPending = addressesWithBalance && addressesWithBalance.find(i => i.containsPending);
+
     return (
       <div>
-        <div className={[cstyles.well, cstyles.balancebox].join(' ')}>
-          <BalanceBlockHighlight
-            zecValue={totalBalance.total}
-            usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.total)}
-            currencyName={info.currencyName}
-          />
-          <BalanceBlock
-            topLabel="Shielded"
-            zecValue={totalBalance.private}
-            usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.private)}
-            currencyName={info.currencyName}
-          />
-          <BalanceBlock
-            topLabel="Transparent"
-            zecValue={totalBalance.transparent}
-            usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.transparent)}
-            currencyName={info.currencyName}
-          />
+        <div className={[cstyles.well, cstyles.containermargin].join(' ')}>
+          <div className={cstyles.balancebox}>
+            <BalanceBlockHighlight
+              zecValue={totalBalance.total}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.total)}
+              currencyName={info.currencyName}
+            />
+            <BalanceBlock
+              topLabel="Shielded"
+              zecValue={totalBalance.private}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.private)}
+              currencyName={info.currencyName}
+            />
+            <BalanceBlock
+              topLabel="Transparent"
+              zecValue={totalBalance.transparent}
+              usdValue={Utils.getZecToUsdString(info.zecPrice, totalBalance.transparent)}
+              currencyName={info.currencyName}
+            />
+          </div>
+          <div>
+            {anyPending && (
+              <div className={[cstyles.red, cstyles.small, cstyles.padtopsmall].join(' ')}>
+                Some transactions are pending. Balances may change.
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.addressbalancecontainer}>

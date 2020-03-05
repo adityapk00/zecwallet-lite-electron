@@ -9,6 +9,7 @@
 import React, { PureComponent } from 'react';
 import Modal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
+import { withRouter } from 'react-router-dom';
 import styles from './Send.css';
 import cstyles from './Common.css';
 import { ToAddr, AddressBalance, SendPageState, Info, AddressBookEntry, TotalBalance } from './AppState';
@@ -17,6 +18,7 @@ import ScrollPane from './ScrollPane';
 import ArrowUpLight from '../assets/img/arrow_up_dark.png';
 import { ErrorModal } from './ErrorModal';
 import { BalanceBlockHighlight } from './BalanceBlocks';
+import routes from '../constants/routes.json';
 
 type OptionType = {
   value: string,
@@ -204,7 +206,8 @@ const ConfirmModalToAddr = ({ toaddr, info }) => {
   );
 };
 
-const ConfirmModal = ({
+// Internal because we're using withRouter just below
+const ConfirmModalInternal = ({
   sendPageState,
   info,
   sendTransaction,
@@ -212,7 +215,8 @@ const ConfirmModal = ({
   closeModal,
   modalIsOpen,
   openErrorModal,
-  openPasswordAndUnlockIfNeeded
+  openPasswordAndUnlockIfNeeded,
+  history
 }) => {
   const sendingTotal = sendPageState.toaddrs.reduce((s, t) => parseFloat(s) + parseFloat(t.amount), 0.0) + 0.0001;
   const { bigPart, smallPart } = Utils.splitZecAmountIntoBigSmall(sendingTotal);
@@ -221,28 +225,37 @@ const ConfirmModal = ({
     // First, close the confirm modal.
     closeModal();
 
-    openPasswordAndUnlockIfNeeded(() => {
-      // This will be replaced by either a success TXID or error message that the user
-      // has to close manually.
-      openErrorModal('Computing Transaction', 'Please wait...This could take a while');
+    // This will be replaced by either a success TXID or error message that the user
+    // has to close manually.
+    openErrorModal('Computing Transaction', 'Please wait...This could take a while');
 
-      // Then send the Tx async
-      (async () => {
-        const sendJson = getSendManyJSON(sendPageState);
-        let success = false;
+    // Now, send the Tx in a timeout, so that the error modal above has a chance to display
+    setTimeout(() => {
+      openPasswordAndUnlockIfNeeded(() => {
+        // Then send the Tx async
+        (async () => {
+          const sendJson = getSendManyJSON(sendPageState);
+          let txid = '';
 
-        try {
-          success = await sendTransaction(sendJson, openErrorModal);
-        } catch (err) {
-          // If there was an error, show the error modal
-          openErrorModal('Error Sending Transaction', err);
-        }
+          try {
+            txid = sendTransaction(sendJson);
 
-        if (success) {
-          clearToAddrs();
-        }
-      })();
-    });
+            openErrorModal(
+              'Successfully Broadcast Transaction',
+              `Transaction was successfully broadcast.\nTXID: ${txid}`
+            );
+
+            clearToAddrs();
+
+            // Redirect to dashboard after
+            history.push(routes.DASHBOARD);
+          } catch (err) {
+            // If there was an error, show the error modal
+            openErrorModal('Error Sending Transaction', err);
+          }
+        })();
+      });
+    }, 10);
   };
 
   return (
@@ -299,12 +312,14 @@ const ConfirmModal = ({
   );
 };
 
+const ConfirmModal = withRouter(ConfirmModalInternal);
+
 type Props = {
   addresses: string[],
   totalBalance: TotalBalance,
   addressBook: AddressBookEntry[],
   sendPageState: SendPageState,
-  sendTransaction: (sendJson: [], (string, string) => void) => void,
+  sendTransaction: (sendJson: []) => string,
   setSendPageState: (sendPageState: SendPageState) => void,
   openErrorModal: (title: string, body: string) => void,
   closeErrorModal: () => void,

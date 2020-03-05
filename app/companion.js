@@ -95,7 +95,7 @@ export default class CompanionAppListener {
 
   fnGetState: () => AppState = null;
 
-  fnSendTransaction: ([], (string, string) => void) => void = null;
+  fnSendTransaction: ([]) => string = null;
 
   fnUpdateConnectedClient: (string, number) => void = null;
 
@@ -105,7 +105,7 @@ export default class CompanionAppListener {
 
   constructor(
     fnGetSate: () => AppState,
-    fnSendTransaction: ([], (string, string) => void) => void,
+    fnSendTransaction: ([]) => string,
     fnUpdateConnectedClient: (string, number) => void
   ) {
     this.fnGetState = fnGetSate;
@@ -466,37 +466,34 @@ export default class CompanionAppListener {
 
     console.log('sendjson is', sendJSON);
 
-    this.fnSendTransaction(sendJSON, (title, msg) => {
-      let resp;
-      if (title.startsWith('Success')) {
-        const arr = msg.split(' ');
-        const txid = arr && arr.length > 0 && arr[arr.length - 1];
+    let resp;
 
-        resp = {
-          version: 1.0,
-          command: 'sendTxSubmitted',
-          txid
-        };
-      } else {
-        resp = {
-          version: 1.0,
-          command: 'sendTxFailed',
-          err: msg
-        };
-      }
+    try {
+      const txid = this.fnSendTransaction(sendJSON);
 
-      // console.log('Callback sending', resp);
+      // After the transaction is submitted, we return an intermediate success.
+      resp = {
+        version: 1.0,
+        command: 'sendTx',
+        result: 'success'
+      };
       ws.send(this.encryptOutgoing(JSON.stringify(resp)));
-    });
 
-    // After the transaction is submitted, we return an intermediate success.
-    const resp = {
-      version: 1.0,
-      command: 'sendTx',
-      result: 'success'
-    };
+      // And then another one when the Tx was submitted successfully. For lightclient, this is the same,
+      // so we end up sending 2 responses back to back
+      resp = {
+        version: 1.0,
+        command: 'sendTxSubmitted',
+        txid
+      };
+    } catch (err) {
+      resp = {
+        version: 1.0,
+        command: 'sendTxFailed',
+        err
+      };
+    }
 
-    // console.log('sendtx sending', resp);
     return JSON.stringify(resp);
   }
 }

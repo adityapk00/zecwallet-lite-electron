@@ -307,10 +307,10 @@ export default class RouteApp extends React.Component<Props, AppState> {
     this.setState({ info: newInfo });
   };
 
-  sendTransaction = async (sendJson: [], fnOpenSendErrorModal: (string, string) => void) => {
+  sendTransaction = (sendJson: []): string => {
     try {
-      const success = await this.rpc.sendTransaction(sendJson, fnOpenSendErrorModal);
-      return success;
+      const txid = this.rpc.sendTransaction(sendJson);
+      return txid;
     } catch (err) {
       console.log('route sendtx error', err);
     }

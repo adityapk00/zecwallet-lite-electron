@@ -139,19 +139,44 @@ export default class RPC {
     balance.transparent = balanceJSON.tbalance / 10 ** 8;
     balance.verifiedPrivate = balanceJSON.verified_zbalance / 10 ** 8;
     balance.total = balance.private + balance.transparent;
-
     this.fnSetTotalBalance(balance);
+
+    // Fetch pending notes and UTXOs
+    const pendingNotes = native.litelib_execute('notes', '');
+    const pendingJSON = JSON.parse(pendingNotes);
+
+    const pendingAddressBalances = new Map();
+
+    // Process sapling notes
+    pendingJSON.pending_notes.forEach(s => {
+      pendingAddressBalances.set(s.address, s.value);
+    });
+
+    // Process UTXOs
+    pendingJSON.pending_utxos.forEach(s => {
+      pendingAddressBalances.set(s.address, s.value);
+    });
 
     // Addresses with Balance. The lite client reports balances in zatoshi, so divide by 10^8;
     const zaddresses = balanceJSON.z_addresses
       .map(o => {
-        return new AddressBalance(o.address, o.zbalance / 10 ** 8);
+        // If this has any unconfirmed txns, show that in the UI
+        const ab = new AddressBalance(o.address, o.zbalance / 10 ** 8);
+        if (pendingAddressBalances.has(ab.address)) {
+          ab.containsPending = true;
+        }
+        return ab;
       })
       .filter(ab => ab.balance > 0);
 
     const taddresses = balanceJSON.t_addresses
       .map(o => {
-        return new AddressBalance(o.address, o.balance / 10 ** 8);
+        // If this has any unconfirmed txns, show that in the UI
+        const ab = new AddressBalance(o.address, o.balance / 10 ** 8);
+        if (pendingAddressBalances.has(ab.address)) {
+          ab.containsPending = true;
+        }
+        return ab;
       })
       .filter(ab => ab.balance > 0);
 
@@ -231,9 +256,7 @@ export default class RPC {
   }
 
   // Send a transaction using the already constructed sendJson structure
-  async sendTransaction(sendJson: [], fnOpenSendErrorModal: (string, string) => void): boolean {
-    this.fnOpenSendErrorModal = fnOpenSendErrorModal;
-
+  sendTransaction(sendJson: []): string {
     let sendStr;
     try {
       sendStr = native.litelib_execute('send', JSON.stringify(sendJson));
@@ -256,16 +279,11 @@ export default class RPC {
       console.log(`Error sending Tx: ${error}`);
       throw error;
     } else {
-      this.fnOpenSendErrorModal(
-        'Successfully Broadcast Transaction',
-        `Transaction was successfully broadcast. TXID: ${txid}`
-      );
-
       // And refresh data (full refresh)
       this.refresh(null);
-    }
 
-    return true;
+      return txid;
+    }
   }
 
   async encryptWallet(password): boolean {

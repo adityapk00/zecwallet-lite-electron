@@ -1,11 +1,8 @@
 /* eslint-disable max-classes-per-file */
 
 export class TotalBalance {
-  // Total t address, confirmed
+  // Total t address, confirmed and spendable
   transparent: number;
-
-  // Total t address, unconfirmed
-  unconfirmedTransparent: number;
 
   // Total private, confirmed + unconfirmed
   private: number;
@@ -22,9 +19,12 @@ export class AddressBalance {
 
   balance: number;
 
+  containsPending: boolean;
+
   constructor(address: string, balance: number) {
     this.address = address;
     this.balance = balance;
+    this.containsPending = false;
   }
 }
 
